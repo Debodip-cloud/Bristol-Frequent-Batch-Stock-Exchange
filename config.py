@@ -4,7 +4,7 @@
 # General
 sessionLength = 1  # Length of session in seconds.
 virtualSessionLength = 600  # Number of virtual timesteps per sessionLength.
-verbose = False  # Adds additional output for debugging.
+verbose = True  # Adds additional output for debugging. #changed this to True
 
 # BSE ONLY
 start_time = 0.0

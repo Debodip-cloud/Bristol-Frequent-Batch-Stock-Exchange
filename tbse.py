@@ -201,7 +201,7 @@ def run_exchange(
     """
     Function for running of the exchange.
     :param exchange: Exchange object
-    :param order_q: Queue on which new orders are sent to the queue
+    :param order_q: Queue on which new orders are sent to the queue (Exchange?)
     :param trader_qs: Queues by which traders receive updates from the exchange
     :param kill_q: Queue where orders to be removed from the exchange are placed
     :param start_event: Event indicating if the exchange is active
@@ -221,7 +221,7 @@ def run_exchange(
         while kill_q.empty() is False:
             exchange.del_order(virtual_time, kill_q.get())
 
-        order = order_q.get()
+        order = order_q.get() #do all this at batch period 
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
                 continue
@@ -252,7 +252,7 @@ def run_trader(
         bookkeep_verbose):
     """
     Function for running a single trader. Multiple of these are run on a number of threads created in market_session()
-    :param trader: The trader this function is controlling
+    :param trader: The trader this function is controlling5
     :param exchange: The exchange object
     :param order_q: Queue where the trader places new orders to send to the exchange
     :param trader_q: Queue where the exchange updates this trader on activities in the market
@@ -283,7 +283,7 @@ def run_trader(
             trader.times[1] += time2 - time1
             trader.times[3] += 1
 
-        lob = exchange.publish_lob(virtual_time, False)
+        lob = exchange.publish_lob(virtual_time, False) 
         time1 = time.time()
         trader.respond(virtual_time, lob, trade, respond_verbose)
         time2 = time.time()
