@@ -214,27 +214,47 @@ def run_exchange(
     """
     completed_coid = {}
     start_event.wait()
-    while start_event.isSet():
-
+    orders_to_batch = [] 
+    while start_event.isSet():        
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
         while kill_q.empty() is False:
             exchange.del_order(virtual_time, kill_q.get())
-
+        
         order = order_q.get() #do all this at batch period 
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
                 continue
         else:
             completed_coid[order.coid] = False
+            orders_to_batch.append(order) #adding order to batched orders
+            
+        #(trade, lob) = exchange.process_order2(virtual_time, order, process_verbose)
+        
+        #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
+        
+        (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
 
-        (trade, lob) = exchange.process_order2(virtual_time, order, process_verbose)
 
-        if trade is not None:
-            completed_coid[order.coid] = True
-            completed_coid[trade['counter']] = True
-            for q in trader_qs:
-                q.put([trade, order, lob])
+        # if exchange.do_batch(virtual_time) == True:
+        #     print("Do batch")
+        #     (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
+        #     orders_to_batch = []
+
+        #go through trades and add to batches
+        
+        if trades is not None:
+            #batch has happened so clear order list
+            orders_to_batch = []
+            for trade in trades: 
+                if trade is not None:
+                    completed_coid[order.coid] = True
+                    completed_coid[trade['counter']] = True
+                    for q in trader_qs:
+                        q.put([trade, order, lob])
+        
+            
+    print("finished trading")    
     return 0
 
 
@@ -283,7 +303,7 @@ def run_trader(
             trader.times[1] += time2 - time1
             trader.times[3] += 1
 
-        lob = exchange.publish_lob(virtual_time, False) 
+        lob = exchange.publish_lob(virtual_time, False) #this should return pre-batch LOB
         time1 = time.time()
         trader.respond(virtual_time, lob, trade, respond_verbose)
         time2 = time.time()
@@ -640,7 +660,7 @@ if __name__ == "__main__":
                         start_session_event,
                         False)
 
-                    if NUM_THREADS != trader_count + 2:
+                    if NUM_THREADS != trader_count + 2: #traders + exchange + market thread
                         trial = trial - 1
                         start_session_event.clear()
                         time.sleep(0.5)

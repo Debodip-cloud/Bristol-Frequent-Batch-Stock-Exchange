@@ -344,6 +344,145 @@ class Exchange(Orderbook):
             return transaction_record, lob
         return None, lob
 
+    def process_order_batch2(self, time, orders, verbose):
+        """
+        receive a batch of orders and execute a frequent batch auction to match buyers and sellers
+        :param time: Current time
+        :param orders: List of orders being processed
+        :param verbose: Should verbose logging be printed to the console
+        :return: list of transaction records
+        """
+
+        round_time = round(time)
+        
+        if not round_time%1==0: #need a better measure for time as sometimes skips
+            return None,self.publish_lob(time,verbose)
+        
+        print(f'rounded time {round_time}')
+        print(f'normal time {time}')
+        print(f'There are {self.asks.n_orders} asks')
+        print(f'There are {self.bids.n_orders} bids')
+
+
+        #will need mechanism to check if all old bids have been used up
+        old_asks = self.asks.orders.values()
+        old_bids = self.bids.orders.values()
+
+        print(f' current LOB for asks  {old_asks}')
+        print(list(old_asks))
+
+        print(f'current LOB for bids  {old_bids}')
+        print(list(old_bids))
+
+        #need error checking on this if orders is 0
+        new_bids = []
+        new_asks = []
+
+        for order in orders:
+            if order.otype =='Bid':
+                new_bids.append(order)
+            else:
+                new_asks.append(order)
+    
+        asks = new_asks+list(old_asks)
+        bids = new_bids+list(old_bids)
+
+        print(f'Time is {time}')
+        print(f'all bids {bids}')
+        print(f'all asks {asks}')
+
+        # Initialize transaction records list
+        transaction_records = []
+
+        while bids and asks: #getting stuck here There could be bids and asks but no buyers and sellers 
+            
+                                   
+            #int returns 1 if true otherwise 0
+            #assigns best priority to items in old_orders
+            bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
+            asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
+
+            print(f"The bids are {bids}")
+            print(f"The asks are {asks}")
+            exit
+            
+            # Determine the auction price as the midpoint between the highest bid and lowest ask
+            # WILL PROBABLY NEED TO CHANGE THIS TO FIND BETTER PRICE
+            
+            auction_price = (bids[0].price + asks[0].price) / 2
+           
+            # Match buyers and sellers with orders at or above the auction price
+            buyers = [b for b in bids if b.price >= auction_price]
+            sellers = [s for s in asks if s.price <= auction_price]
+
+            # Sort buyers and sellers by time priority, with earliest orders first 
+            # DO I NEED TO GO THROUGH ALL ORDERS OR JUST NEW ORDERS
+
+            print(f'The buyers are {buyers}')
+            print(f'The sellers are {buyers}')
+
+        
+            # Execute trades between buyers and sellers, up to the quantity available at the auction price
+            trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
+
+            while buyers and sellers and trade_qty > 0:
+                print(f'trade quantity {trade_qty}')
+                buyer = buyers[0]
+                seller = sellers[0]
+                trade_qty = min(trade_qty, min(buyer.qty, seller.qty))
+                transaction_record = {
+                    'type': 'Trade',
+                    't': time,
+                    'price': auction_price,
+                    'party1': seller.tid,
+                    'party2': buyer.tid,
+                    'qty': trade_qty,
+                    'coid': buyer.coid,
+                    'counter': seller.coid
+                }
+                transaction_records.append(transaction_record)
+                if verbose:
+                    print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
+                buyer.qty -= trade_qty
+                seller.qty -= trade_qty
+                
+                if buyer.qty == 0:
+                    bids.remove(buyer)
+                    buyers.remove(buyer)
+                    if buyer in old_bids:
+                        print(f'buyer {buyer}')
+                        print(f'buyers {buyers}')
+                        self.del_order(buyer,time)
+
+                if seller.qty == 0:
+                    asks.remove(seller)
+                    sellers.remove(seller)
+                    if seller in old_asks:
+                        # print(f'seller {seller}')
+                        # print(f'sellers {sellers}')
+                        self.del_order(seller,time)
+
+        print("Completed matching process")  
+        print(f'bids and asks remaining {bids+asks}')              
+
+        # Add any remaining unmatched bids and asks to the order book
+        for o in bids + asks:
+            print("unmatched bids and asks")
+            toid, response = self.add_order(o, verbose)
+            o.toid = toid
+            if verbose:
+                print(f'TOID: order.toid={o.toid}')
+                print(f'RESPONSE: {response}')
+
+        # Publish the updated order book
+        print("LOB AFTER: ")
+        lob = self.publish_lob(time, False)
+        print (lob)
+
+        sys.exit()
+
+        return transaction_records,lob
+
     def tape_dump(self, file_name, file_mode, tape_mode):
         """
         Dumps current tape to file
