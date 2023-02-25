@@ -45,6 +45,7 @@ NB this code has been written to be readable/intelligible, not efficient!"""
 
 import csv
 import math
+import os
 import queue
 import random
 import sys
@@ -228,24 +229,21 @@ def run_exchange(
         else:
             completed_coid[order.coid] = False
             orders_to_batch.append(order) #adding order to batched orders
-            
-        #(trade, lob) = exchange.process_order2(virtual_time, order, process_verbose)
-        
-        #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
-        
-        (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
-
-
-        # if exchange.do_batch(virtual_time) == True:
-        #     print("Do batch")
-        #     (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
-        #     orders_to_batch = []
-
-        #go through trades and add to batches
-        
-        if trades is not None:
-            #batch has happened so clear order list
+                    
+        #time seems to go from 8.5 to [42,end]
+        print(f'time is {virtual_time}')
+        if(round(virtual_time)%30==0):
+            print("\n")
+            print("Entering batch process")
+            print("\n")
+            print(f'time is {virtual_time}')
+            #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
+            (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
             orders_to_batch = []
+
+            print(f'There has been {len(trades)} during this batch')
+            print(f'trades {trades}')
+            
             for trade in trades: 
                 if trade is not None:
                     completed_coid[order.coid] = True
@@ -253,8 +251,11 @@ def run_exchange(
                     for q in trader_qs:
                         q.put([trade, order, lob])
         
+            print(f'time at end of batch is {virtual_time}')
+        
+
             
-    print("finished trading")    
+    print("finished trading day")    
     return 0
 
 

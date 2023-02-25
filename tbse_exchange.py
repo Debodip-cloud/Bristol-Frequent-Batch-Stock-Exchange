@@ -3,6 +3,7 @@ Module containing classes for describing a simulated exchange
 
 Minor adaptions from the original BSE code by Dave Cliff
 """
+import os
 import sys
 
 from tbse_sys_consts import TBSE_SYS_MIN_PRICE, TBSE_SYS_MAX_PRICE
@@ -352,27 +353,14 @@ class Exchange(Orderbook):
         :param verbose: Should verbose logging be printed to the console
         :return: list of transaction records
         """
-
-        round_time = round(time)
         
-        if not round_time%1==0: #need a better measure for time as sometimes skips
-            return None,self.publish_lob(time,verbose)
-        
-        print(f'rounded time {round_time}')
-        print(f'normal time {time}')
-        print(f'There are {self.asks.n_orders} asks')
-        print(f'There are {self.bids.n_orders} bids')
-
-
-        #will need mechanism to check if all old bids have been used up
+        print("LOB Before: ")
+        lob = self.publish_lob(time, False)
+        print (lob)
+        print("\n")
+  
         old_asks = self.asks.orders.values()
         old_bids = self.bids.orders.values()
-
-        print(f' current LOB for asks  {old_asks}')
-        print(list(old_asks))
-
-        print(f'current LOB for bids  {old_bids}')
-        print(list(old_bids))
 
         #need error checking on this if orders is 0
         new_bids = []
@@ -387,29 +375,30 @@ class Exchange(Orderbook):
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
 
-        print(f'Time is {time}')
         print(f'all bids {bids}')
         print(f'all asks {asks}')
+        print("\n")
 
         # Initialize transaction records list
         transaction_records = []
 
-        while bids and asks: #getting stuck here There could be bids and asks but no buyers and sellers 
-            
-                                   
+
+        while bids and asks: #getting stuck here. Sort it before and find auction price before?
+            #There could be bids and asks but no buyers and sellers 
             #int returns 1 if true otherwise 0
             #assigns best priority to items in old_orders
+            #IS THIS NOT WORKING?
             bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
             asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
 
-            print(f"The bids are {bids}")
-            print(f"The asks are {asks}")
-            exit
+            # print(f"The bids are {bids}")
+            # print(f"The asks are {asks}")
             
             # Determine the auction price as the midpoint between the highest bid and lowest ask
             # WILL PROBABLY NEED TO CHANGE THIS TO FIND BETTER PRICE
+            #am I failing because this is poor mechanism
             
-            auction_price = (bids[0].price + asks[0].price) / 2
+            auction_price = (bids[0].price + asks[0].price) / 2 
            
             # Match buyers and sellers with orders at or above the auction price
             buyers = [b for b in bids if b.price >= auction_price]
@@ -418,18 +407,30 @@ class Exchange(Orderbook):
             # Sort buyers and sellers by time priority, with earliest orders first 
             # DO I NEED TO GO THROUGH ALL ORDERS OR JUST NEW ORDERS
 
-            print(f'The buyers are {buyers}')
-            print(f'The sellers are {buyers}')
+            #returning error a lot of the time
+            # print(f'The buyers are {buyers}') 
+            # print(f'The sellers are {buyers}') 
 
         
             # Execute trades between buyers and sellers, up to the quantity available at the auction price
+            
             trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
+            step = 0
 
             while buyers and sellers and trade_qty > 0:
+                #BREAKING HERE
+                print("\n")
+                step+=1
+                print(f"in trading step {step}")
                 print(f'trade quantity {trade_qty}')
+                print(f'buyers {buyers}')
+                print(f'sellers {sellers}')
+
                 buyer = buyers[0]
                 seller = sellers[0]
-                trade_qty = min(trade_qty, min(buyer.qty, seller.qty))
+                trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) #should be 1
+                print(f'trade quantity after identifying buyers and sellers (should be 1) {trade_qty}')
+
                 transaction_record = {
                     'type': 'Trade',
                     't': time,
@@ -445,22 +446,39 @@ class Exchange(Orderbook):
                     print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
                 buyer.qty -= trade_qty
                 seller.qty -= trade_qty
+
+                print(f"buyer quantity {buyer.qty}")
+                print(f"seller quantity {seller.qty}")
+
                 
+                #could get rid of loops as buyer/seller quantity should always swap
+                #seems to break here.
                 if buyer.qty == 0:
+                    print("removing new buyer")
                     bids.remove(buyer)
                     buyers.remove(buyer)
-                    if buyer in old_bids:
+                    print("removed new buyer")
+                    if buyer in old_bids: #checking here could give error as empty
+                        print("removing old buyer")
                         print(f'buyer {buyer}')
                         print(f'buyers {buyers}')
                         self.del_order(buyer,time)
+                        print("removed old buyer")
+                    print("done with removing buyer")
+
+
 
                 if seller.qty == 0:
+                    print("removing new seller")
                     asks.remove(seller)
                     sellers.remove(seller)
-                    if seller in old_asks:
-                        # print(f'seller {seller}')
-                        # print(f'sellers {sellers}')
+                    print("removed new seller")
+                    if seller in old_asks: 
+                        print("removing old seller")
                         self.del_order(seller,time)
+                        print("removed old seller")
+                    print("done with removing seller")
+
 
         print("Completed matching process")  
         print(f'bids and asks remaining {bids+asks}')              
@@ -478,9 +496,6 @@ class Exchange(Orderbook):
         print("LOB AFTER: ")
         lob = self.publish_lob(time, False)
         print (lob)
-
-        sys.exit()
-
         return transaction_records,lob
 
     def tape_dump(self, file_name, file_mode, tape_mode):
