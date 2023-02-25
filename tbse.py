@@ -231,8 +231,10 @@ def run_exchange(
             orders_to_batch.append(order) #adding order to batched orders
                     
         #time seems to go from 8.5 to [42,end]
-        print(f'time is {virtual_time}')
-        if(round(virtual_time)%30==0):
+        #print(f'time is {virtual_time}')        
+        
+        #if(round(virtual_time)%30==0):
+        if(round(virtual_time)==60 or ):
             print("\n")
             print("Entering batch process")
             print("\n")

@@ -374,110 +374,76 @@ class Exchange(Orderbook):
     
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
+        
+        bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
+        asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
+
+        if len(bids)==0 or len(asks)==0: 
+            auction_price = TBSE_SYS_MIN_PRICE
+            
+        else:
+            auction_price = (bids[0].price + asks[0].price) / 2 
+
+        buyers = [b for b in bids if b.price >= auction_price]
+        sellers = [s for s in asks if s.price <= auction_price]      
+        trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
+        step = 0
 
         print(f'all bids {bids}')
         print(f'all asks {asks}')
         print("\n")
 
         # Initialize transaction records list
-        transaction_records = []
+        transaction_records = []    
 
+        while buyers and sellers and trade_qty > 0:
+            #BREAKING HERE
+            print("\n")
+            step+=1
+            # print(f"in trading step {step}")
+            # print(f'trade quantity {trade_qty}')
+            # print(f'buyers {buyers}')
+            # print(f'sellers {sellers}')
 
-        while bids and asks: #getting stuck here. Sort it before and find auction price before?
-            #There could be bids and asks but no buyers and sellers 
-            #int returns 1 if true otherwise 0
-            #assigns best priority to items in old_orders
-            #IS THIS NOT WORKING?
-            bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
-            asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
+            buyer = buyers[0]
+            seller = sellers[0]
+            trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) #should be 1
+            # print(f'trade quantity after identifying buyers and sellers (should be 1) {trade_qty}')
 
-            # print(f"The bids are {bids}")
-            # print(f"The asks are {asks}")
+            transaction_record = {
+                'type': 'Trade',
+                't': time,
+                'price': auction_price,
+                'party1': seller.tid,
+                'party2': buyer.tid,
+                'qty': trade_qty,
+                'coid': buyer.coid,
+                'counter': seller.coid
+            }
+            transaction_records.append(transaction_record)
+            if verbose:
+                print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
+            buyer.qty -= trade_qty
+            seller.qty -= trade_qty
+
+            # print(f"buyer quantity {buyer.qty}")
+            # print(f"seller quantity {seller.qty}")
+
             
-            # Determine the auction price as the midpoint between the highest bid and lowest ask
-            # WILL PROBABLY NEED TO CHANGE THIS TO FIND BETTER PRICE
-            #am I failing because this is poor mechanism
-            
-            auction_price = (bids[0].price + asks[0].price) / 2 
-           
-            # Match buyers and sellers with orders at or above the auction price
-            buyers = [b for b in bids if b.price >= auction_price]
-            sellers = [s for s in asks if s.price <= auction_price]
-
-            # Sort buyers and sellers by time priority, with earliest orders first 
-            # DO I NEED TO GO THROUGH ALL ORDERS OR JUST NEW ORDERS
-
-            #returning error a lot of the time
-            # print(f'The buyers are {buyers}') 
-            # print(f'The sellers are {buyers}') 
-
         
-            # Execute trades between buyers and sellers, up to the quantity available at the auction price
-            
-            trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-            step = 0
-
-            while buyers and sellers and trade_qty > 0:
-                #BREAKING HERE
-                print("\n")
-                step+=1
-                print(f"in trading step {step}")
-                print(f'trade quantity {trade_qty}')
-                print(f'buyers {buyers}')
-                print(f'sellers {sellers}')
-
-                buyer = buyers[0]
-                seller = sellers[0]
-                trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) #should be 1
-                print(f'trade quantity after identifying buyers and sellers (should be 1) {trade_qty}')
-
-                transaction_record = {
-                    'type': 'Trade',
-                    't': time,
-                    'price': auction_price,
-                    'party1': seller.tid,
-                    'party2': buyer.tid,
-                    'qty': trade_qty,
-                    'coid': buyer.coid,
-                    'counter': seller.coid
-                }
-                transaction_records.append(transaction_record)
-                if verbose:
-                    print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
-                buyer.qty -= trade_qty
-                seller.qty -= trade_qty
-
-                print(f"buyer quantity {buyer.qty}")
-                print(f"seller quantity {seller.qty}")
-
-                
-                #could get rid of loops as buyer/seller quantity should always swap
-                #seems to break here.
-                if buyer.qty == 0:
-                    print("removing new buyer")
-                    bids.remove(buyer)
-                    buyers.remove(buyer)
-                    print("removed new buyer")
-                    if buyer in old_bids: #checking here could give error as empty
-                        print("removing old buyer")
-                        print(f'buyer {buyer}')
-                        print(f'buyers {buyers}')
-                        self.del_order(buyer,time)
-                        print("removed old buyer")
-                    print("done with removing buyer")
+            if buyer.qty == 0:
+                bids.remove(buyer)
+                buyers.remove(buyer)
+                if buyer in old_bids: #checking here could give error as empty
+                    self.del_order(buyer,time)
 
 
 
-                if seller.qty == 0:
-                    print("removing new seller")
-                    asks.remove(seller)
-                    sellers.remove(seller)
-                    print("removed new seller")
-                    if seller in old_asks: 
-                        print("removing old seller")
-                        self.del_order(seller,time)
-                        print("removed old seller")
-                    print("done with removing seller")
+            if seller.qty == 0:
+                asks.remove(seller)
+                sellers.remove(seller)
+                if seller in old_asks: 
+                    self.del_order(seller,time)
 
 
         print("Completed matching process")  
@@ -485,7 +451,6 @@ class Exchange(Orderbook):
 
         # Add any remaining unmatched bids and asks to the order book
         for o in bids + asks:
-            print("unmatched bids and asks")
             toid, response = self.add_order(o, verbose)
             o.toid = toid
             if verbose:
