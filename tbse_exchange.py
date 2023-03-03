@@ -366,6 +366,9 @@ class Exchange(Orderbook):
         new_bids = []
         new_asks = []
 
+        if len(orders)==0:
+            return None,lob
+        
         for order in orders:
             if order.otype =='Bid':
                 new_bids.append(order)
@@ -421,6 +424,7 @@ class Exchange(Orderbook):
                 'counter': seller.coid
             }
             transaction_records.append(transaction_record)
+            self.tape.append(transaction_record)
             if verbose:
                 print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
             buyer.qty -= trade_qty
