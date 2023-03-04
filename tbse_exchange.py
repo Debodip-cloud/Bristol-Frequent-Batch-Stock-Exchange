@@ -392,8 +392,9 @@ class Exchange(Orderbook):
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
         step = 0
 
-        print(f'all bids {bids}')
-        print(f'all asks {asks}')
+        print(f'new bids {new_bids}')
+        print('\n')
+        print(f'new asks {new_asks}')
         print("\n")
 
         # Initialize transaction records list
@@ -427,6 +428,7 @@ class Exchange(Orderbook):
             self.tape.append(transaction_record)
             if verbose:
                 print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
+            
             buyer.qty -= trade_qty
             seller.qty -= trade_qty
 
@@ -450,8 +452,8 @@ class Exchange(Orderbook):
                     self.del_order(seller,time)
 
 
-        print("Completed matching process")  
-        print(f'bids and asks remaining {bids+asks}')              
+        #print("Completed matching process")  
+        #print(f'bids and asks remaining {bids+asks}')              
 
         # Add any remaining unmatched bids and asks to the order book
         for o in bids + asks:

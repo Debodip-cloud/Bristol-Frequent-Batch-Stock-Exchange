@@ -216,26 +216,29 @@ def run_exchange(
     completed_coid = {}
     start_event.wait()
     orders_to_batch = [] 
+    
+    batch_period = 250 # seconds
+    last_batch_time = 0
+
     while start_event.isSet():        
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
-        while kill_q.empty() is False:
-            exchange.del_order(virtual_time, kill_q.get())
+        # while kill_q.empty() is False:
+        #     #exchange.del_order(virtual_time, kill_q.get())
         
         order = order_q.get() #do all this at batch period 
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                pass
+                continue 
+                #pass
         else:
             completed_coid[order.coid] = False
             orders_to_batch.append(order) #adding order to batched orders
 
 
-        #time seems to go from 8.5 to [42,end]
-        #print(f'time is {virtual_time}')  
-        #if((round(virtual_time)>=58 and round(virtual_time)<=62) or (round(virtual_time)>=89 and round(virtual_time)<=91) ): #need to improve this batch measuring process      
-        if(round(virtual_time)==60 or round(virtual_time)==90 or round(virtual_time)==120 or round(virtual_time)==150) : #need to improve this batch measuring process
-
+        #time seems to go from 8.5 to [42,end]        
+        elapsed_time = virtual_time - last_batch_time
+        if elapsed_time>=batch_period : #need to improve this batch measuring process
             print("\n")
             print("Entering batch process")
             print("\n")
@@ -243,20 +246,17 @@ def run_exchange(
             #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
             (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
             orders_to_batch = []
-            print(f'There has been {len(trades)} during this batch')
-            print(f'trades {trades}')
             
-        
-            for trade in trades: 
-                if trade is not None:
+            if trades is not None:
+                print(f'There have been {len(trades)} in this batch')
+                for trade in trades: 
                     completed_coid[order.coid] = True
                     completed_coid[trade['counter']] = True
                     for q in trader_qs:
                         q.put([trade, order, lob])
-                        
+                            
             print(f'time at end of batch is {virtual_time}')
-        
-
+            last_batch_time = virtual_time
             
     print("finished trading day")    
     return 0
