@@ -224,8 +224,8 @@ def run_exchange(
     while start_event.isSet():        
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
-        # while kill_q.empty() is False:
-        #     exchange.del_order(virtual_time, kill_q.get())
+        while kill_q.empty() is False:
+            exchange.del_order(virtual_time, kill_q.get())
         
         # change to remove order from queue.
         #     #traders cancel orders frequently and can appear that LOB has been reset as all orders are cancelled between batches if period is too long
@@ -266,7 +266,7 @@ def run_exchange(
             orders_to_batch = []
             
             if trades is not None:
-                print(f'There have been {len(trades)} in this batch')
+                print(f'There have been {len(trades)} trades in this batch')
                 for trade in trades: 
                     #completed_coid[order.coid] = True
                     completed_coid[trade['coid']] = True #changed this

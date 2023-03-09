@@ -369,8 +369,7 @@ class Exchange(Orderbook):
         if len(orders)==0:
             print("ended batch as there are no new orders")
             return None,lob
-        
-            
+                    
         for order in orders: 
             if order.otype =='Bid':
                 new_bids.append(order)
@@ -384,6 +383,16 @@ class Exchange(Orderbook):
         
         bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
         asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
+
+        if(len(bids)==0):
+            for o in asks:
+                self.add_order(order,verbose)
+                return None,lob
+       
+        if(len(asks)==0):
+            for o in bids:
+                self.add_order(order,verbose)
+                return None,lob
 
         auction_price = (bids[0].price + asks[0].price) / 2 
 
