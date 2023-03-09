@@ -370,6 +370,7 @@ class Exchange(Orderbook):
             print("ended batch as there are no new orders")
             return None,lob
         
+            
         for order in orders: 
             if order.otype =='Bid':
                 new_bids.append(order)
@@ -395,14 +396,11 @@ class Exchange(Orderbook):
         print(f'There are {len(new_asks)} new asks ')
         print(f'There are {len(bids)} total bids')
         print(f'There are {len(asks)} total asks')
+
+        print(f'Auction price is {auction_price}')
         print(f'All bids: {[b.price for b in bids]}')
         print(f'All asks: {[a.price for a in asks]}')
-        print(f'Auction price is {auction_price}')
-
-        print(f'Matched buyers: {[b.price for b in buyers]}')
-        print(f'Matched sellers: {[a.price for a in sellers]}')
-
-
+        
         # Initialize transaction records list
         transaction_records = []    
 
@@ -438,28 +436,26 @@ class Exchange(Orderbook):
             if isinstance(seller, float):
                 print('Seller is float')
                 print(f'Seller is {seller}')
-            
-
 
             if buyer.qty == 0: #add more print statements
                 bids.remove(buyer)
                 buyers.remove(buyer)
                 if buyer in old_bids: #checking here could give error as empty
-                    self.del_order(buyer,time)
+                    self.del_order(time,buyer)
 
             if seller.qty == 0: #add more print statements
                 asks.remove(seller)
                 sellers.remove(seller)
                 if seller in old_asks: 
-                    self.del_order(seller,time)
+                    self.del_order(time,seller)
 
 
         # Add any remaining unmatched bids and asks to the order book
 
-        print(f'Remaining bids: {[b.price for b in bids]}')
-        print(f'Remaining asks: {[a.price for a in asks]}')
-        print(f'Remaining buyers: {[a.price for a in buyers]}')
-        print(f'Remaining sellers: {[a.price for a in sellers]}')
+        # print(f'Remaining bids: {[b.price for b in bids]}')
+        # print(f'Remaining asks: {[a.price for a in asks]}')
+        # print(f'Remaining buyers: {[a.price for a in buyers]}')
+        # print(f'Remaining sellers: {[a.price for a in sellers]}')
         
         print(f'All remaining orders {[(p.price,p.otype,p.tid) for p in bids+asks]}')
 

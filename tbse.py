@@ -217,8 +217,8 @@ def run_exchange(
     start_event.wait()
     orders_to_batch = [] 
     
-    batch_period = 100 # seconds
-    required_batch_number = 2
+    batch_period = 10 # seconds
+    required_batch_number = 3
     last_batch_time = 0
 
     while start_event.isSet():        
@@ -226,6 +226,8 @@ def run_exchange(
 
         # while kill_q.empty() is False:
         #     exchange.del_order(virtual_time, kill_q.get())
+        
+        # change to remove order from queue.
         #     #traders cancel orders frequently and can appear that LOB has been reset as all orders are cancelled between batches if period is too long
         
         order = order_q.get()
@@ -234,16 +236,21 @@ def run_exchange(
                 #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times.  
                 pass
         
-        #this may need to be indented further
         else:
             completed_coid[order.coid] = False
-            #removing stale order from orders to batch if trader has already issued an order
-            order_tids = [o.tid for o in orders_to_batch ]
-            if(order.tid in order_tids):
-                for o in orders_to_batch:
-                    if o.tid == order.tid:
-                        orders_to_batch.remove(0)
-                                        
+            
+            #removing stale order from orders to batch if trader issues a new order. 
+            for o in orders_to_batch:
+                if o.tid == order.tid:
+                    orders_to_batch.remove(o)
+            
+            #removing stale order from LOB if trader issues a new order. 
+            orders_on_exchage = list(exchange.asks.orders.values()) + list(exchange.bids.orders.values())
+            for o in orders_on_exchage:
+                if o.tid == order.tid:
+                    exchange.del_order(time,o)       
+            
+
             orders_to_batch.append(order) #adding order to batched orders
 
 
