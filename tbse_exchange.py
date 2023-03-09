@@ -352,8 +352,8 @@ class Exchange(Orderbook):
         :param orders: List of orders being processed
         :param verbose: Should verbose logging be printed to the console
         :return: list of transaction records
-        """
-        
+        """            
+
         print("LOB Before: ")
         lob = self.publish_lob(time, False)
         print (lob)
@@ -367,13 +367,16 @@ class Exchange(Orderbook):
         new_asks = []
 
         if len(orders)==0:
+            print("ended batch as there are no new orders")
             return None,lob
         
-        for order in orders:
+        for order in orders: 
             if order.otype =='Bid':
                 new_bids.append(order)
-            else:
+            elif order.otype =='Ask':
                 new_asks.append(order)
+            else:
+                print("Other type of order?")
     
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
@@ -381,38 +384,33 @@ class Exchange(Orderbook):
         bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
         asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
 
-        if len(bids)==0 or len(asks)==0: 
-            auction_price = TBSE_SYS_MIN_PRICE
-            
-        else:
-            auction_price = (bids[0].price + asks[0].price) / 2 
+        auction_price = (bids[0].price + asks[0].price) / 2 
 
         buyers = [b for b in bids if b.price >= auction_price]
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-        step = 0
 
-        print(f'new bids {new_bids}')
-        print('\n')
-        print(f'new asks {new_asks}')
-        print("\n")
+        print(f'Trade quantity is {trade_qty}')
+        print(f'There are {len(new_bids)} new bids ')
+        print(f'There are {len(new_asks)} new asks ')
+        print(f'There are {len(bids)} total bids')
+        print(f'There are {len(asks)} total asks')
+        print(f'All bids: {[b.price for b in bids]}')
+        print(f'All asks: {[a.price for a in asks]}')
+        print(f'Auction price is {auction_price}')
+
+        print(f'Matched buyers: {[b.price for b in buyers]}')
+        print(f'Matched sellers: {[a.price for a in sellers]}')
+
 
         # Initialize transaction records list
         transaction_records = []    
 
         while buyers and sellers and trade_qty > 0:
-            #BREAKING HERE
-            print("\n")
-            step+=1
-            # print(f"in trading step {step}")
-            # print(f'trade quantity {trade_qty}')
-            # print(f'buyers {buyers}')
-            # print(f'sellers {sellers}')
 
             buyer = buyers[0]
             seller = sellers[0]
-            trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) #should be 1
-            # print(f'trade quantity after identifying buyers and sellers (should be 1) {trade_qty}')
+            trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) 
 
             transaction_record = {
                 'type': 'Trade',
@@ -424,6 +422,7 @@ class Exchange(Orderbook):
                 'coid': buyer.coid,
                 'counter': seller.coid
             }
+            
             transaction_records.append(transaction_record)
             self.tape.append(transaction_record)
             if verbose:
@@ -432,41 +431,52 @@ class Exchange(Orderbook):
             buyer.qty -= trade_qty
             seller.qty -= trade_qty
 
-            # print(f"buyer quantity {buyer.qty}")
-            # print(f"seller quantity {seller.qty}")
+            if isinstance(buyer, float):
+                print(f'Buyer is a float')
+                print(f'Buyer is {buyer}')
 
+            if isinstance(seller, float):
+                print('Seller is float')
+                print(f'Seller is {seller}')
             
-        
-            if buyer.qty == 0:
+
+
+            if buyer.qty == 0: #add more print statements
                 bids.remove(buyer)
                 buyers.remove(buyer)
                 if buyer in old_bids: #checking here could give error as empty
                     self.del_order(buyer,time)
 
-
-
-            if seller.qty == 0:
+            if seller.qty == 0: #add more print statements
                 asks.remove(seller)
                 sellers.remove(seller)
                 if seller in old_asks: 
                     self.del_order(seller,time)
 
 
-        #print("Completed matching process")  
-        #print(f'bids and asks remaining {bids+asks}')              
-
         # Add any remaining unmatched bids and asks to the order book
+
+        print(f'Remaining bids: {[b.price for b in bids]}')
+        print(f'Remaining asks: {[a.price for a in asks]}')
+        print(f'Remaining buyers: {[a.price for a in buyers]}')
+        print(f'Remaining sellers: {[a.price for a in sellers]}')
+        
+        print(f'All remaining orders {[(p.price,p.otype,p.tid) for p in bids+asks]}')
+
+
         for o in bids + asks:
-            toid, response = self.add_order(o, verbose)
+            toid, response = self.add_order(o, verbose) #orders added with the same price are given as 1 quantity - big problem. 
             o.toid = toid
             if verbose:
                 print(f'TOID: order.toid={o.toid}')
                 print(f'RESPONSE: {response}')
 
         # Publish the updated order book
+
         print("LOB AFTER: ")
         lob = self.publish_lob(time, False)
         print (lob)
+
         return transaction_records,lob
 
     def tape_dump(self, file_name, file_mode, tape_mode):

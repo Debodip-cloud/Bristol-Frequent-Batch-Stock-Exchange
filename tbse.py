@@ -217,31 +217,42 @@ def run_exchange(
     start_event.wait()
     orders_to_batch = [] 
     
-    batch_period = 250 # seconds
+    batch_period = 100 # seconds
+    required_batch_number = 2
     last_batch_time = 0
 
     while start_event.isSet():        
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
         # while kill_q.empty() is False:
-        #     #exchange.del_order(virtual_time, kill_q.get())
+        #     exchange.del_order(virtual_time, kill_q.get())
+        #     #traders cancel orders frequently and can appear that LOB has been reset as all orders are cancelled between batches if period is too long
         
-        order = order_q.get() #do all this at batch period 
+        order = order_q.get()
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                continue 
-                #pass
+                #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times.  
+                pass
+        
+        #this may need to be indented further
         else:
             completed_coid[order.coid] = False
+            #removing stale order from orders to batch if trader has already issued an order
+            order_tids = [o.tid for o in orders_to_batch ]
+            if(order.tid in order_tids):
+                for o in orders_to_batch:
+                    if o.tid == order.tid:
+                        orders_to_batch.remove(0)
+                                        
             orders_to_batch.append(order) #adding order to batched orders
 
 
         #time seems to go from 8.5 to [42,end]        
         elapsed_time = virtual_time - last_batch_time
-        if elapsed_time>=batch_period : #need to improve this batch measuring process
+        if elapsed_time>=batch_period and required_batch_number !=0 :
+            required_batch_number-=1; 
             print("\n")
             print("Entering batch process")
-            print("\n")
             print(f'time is {virtual_time}')
             #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
             (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
@@ -250,7 +261,8 @@ def run_exchange(
             if trades is not None:
                 print(f'There have been {len(trades)} in this batch')
                 for trade in trades: 
-                    completed_coid[order.coid] = True
+                    #completed_coid[order.coid] = True
+                    completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
                     for q in trader_qs:
                         q.put([trade, order, lob])
