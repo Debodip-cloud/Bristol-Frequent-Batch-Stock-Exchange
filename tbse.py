@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     orders_to_batch = [] 
     
-    batch_period = 10 # seconds
+    batch_period = 200 # seconds
     required_batch_number = 3
     last_batch_time = 0
 
@@ -226,14 +226,11 @@ def run_exchange(
 
         while kill_q.empty() is False:
             exchange.del_order(virtual_time, kill_q.get())
-        
-        # change to remove order from queue.
-        #     #traders cancel orders frequently and can appear that LOB has been reset as all orders are cancelled between batches if period is too long
-        
+    
         order = order_q.get()
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times.  
+                #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times which is unnecessary here.  
                 pass
         
         else:
@@ -258,26 +255,29 @@ def run_exchange(
         elapsed_time = virtual_time - last_batch_time
         if elapsed_time>=batch_period and required_batch_number !=0 :
             required_batch_number-=1; 
-            print("\n")
-            print("Entering batch process")
-            print(f'time is {virtual_time}')
-            #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
-            (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
-            orders_to_batch = []
             
+            #eventually change to return (trad,lob,p*,q*) because this is what traders work with in BCS
+            (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
-                print(f'There have been {len(trades)} trades in this batch')
+                print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
                 for trade in trades: 
                     #completed_coid[order.coid] = True
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
-                    for q in trader_qs:
-                        q.put([trade, order, lob])
+                    completed_order=0
+                    for o in orders_to_batch:
+                        if o.coid == trade['coid']:
+                            completed_order = o
                             
-            print(f'time at end of batch is {virtual_time}')
+
+                    for q in trader_qs:
+                        q.put([trade, completed_order, lob]) #find orders from order to batch using TOID and then add this. then clear orders
+            else:
+                print(f'There have been 0 trades in the batch at time {virtual_time}')
+            
+            orders_to_batch = []
             last_batch_time = virtual_time
             
-    print("finished trading day")    
     return 0
 
 
@@ -295,7 +295,7 @@ def run_trader(
         bookkeep_verbose):
     """
     Function for running a single trader. Multiple of these are run on a number of threads created in market_session()
-    :param trader: The trader this function is controlling5
+    :param trader: The trader this function is controlling
     :param exchange: The exchange object
     :param order_q: Queue where the trader places new orders to send to the exchange
     :param trader_q: Queue where the exchange updates this trader on activities in the market
@@ -326,7 +326,9 @@ def run_trader(
             trader.times[1] += time2 - time1
             trader.times[3] += 1
 
-        lob = exchange.publish_lob(virtual_time, False) #this should return pre-batch LOB
+            print(f'trader {trader.tid} is dealing with order {order} at time {virtual_time}' )
+
+        lob = exchange.publish_lob(virtual_time, False)
         time1 = time.time()
         trader.respond(virtual_time, lob, trade, respond_verbose)
         time2 = time.time()

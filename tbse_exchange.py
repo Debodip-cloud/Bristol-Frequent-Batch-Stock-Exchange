@@ -354,20 +354,19 @@ class Exchange(Orderbook):
         :return: list of transaction records
         """            
 
-        print("LOB Before: ")
-        lob = self.publish_lob(time, False)
-        print (lob)
-        print("\n")
+        # print("LOB Before: ")
+        #lob = self.publish_lob(time, False)
+        # print (lob)
+        # print("\n")
   
         old_asks = self.asks.orders.values()
         old_bids = self.bids.orders.values()
-
-        #need error checking on this if orders is 0
         new_bids = []
         new_asks = []
 
         if len(orders)==0:
-            print("ended batch as there are no new orders")
+            #print("ended batch as there are no new orders")
+            lob = self.publish_lob(time, False)
             return None,lob
                     
         for order in orders: 
@@ -387,11 +386,13 @@ class Exchange(Orderbook):
         if(len(bids)==0):
             for o in asks:
                 self.add_order(order,verbose)
+                lob = self.publish_lob(time, False)
                 return None,lob
        
         if(len(asks)==0):
             for o in bids:
                 self.add_order(order,verbose)
+                lob = self.publish_lob(time, False)
                 return None,lob
 
         auction_price = (bids[0].price + asks[0].price) / 2 
@@ -400,15 +401,15 @@ class Exchange(Orderbook):
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
 
-        print(f'Trade quantity is {trade_qty}')
-        print(f'There are {len(new_bids)} new bids ')
-        print(f'There are {len(new_asks)} new asks ')
-        print(f'There are {len(bids)} total bids')
-        print(f'There are {len(asks)} total asks')
+        # print(f'Trade quantity is {trade_qty}')
+        # print(f'There are {len(new_bids)} new bids ')
+        # print(f'There are {len(new_asks)} new asks ')
+        # print(f'There are {len(bids)} total bids')
+        # print(f'There are {len(asks)} total asks')
 
-        print(f'Auction price is {auction_price}')
-        print(f'All bids: {[b.price for b in bids]}')
-        print(f'All asks: {[a.price for a in asks]}')
+        # print(f'Auction price is {auction_price}')
+        # print(f'All bids: {[b.price for b in bids]}')
+        # print(f'All asks: {[a.price for a in asks]}')
         
         # Initialize transaction records list
         transaction_records = []    
@@ -438,14 +439,6 @@ class Exchange(Orderbook):
             buyer.qty -= trade_qty
             seller.qty -= trade_qty
 
-            if isinstance(buyer, float):
-                print(f'Buyer is a float')
-                print(f'Buyer is {buyer}')
-
-            if isinstance(seller, float):
-                print('Seller is float')
-                print(f'Seller is {seller}')
-
             if buyer.qty == 0: #add more print statements
                 bids.remove(buyer)
                 buyers.remove(buyer)
@@ -459,16 +452,14 @@ class Exchange(Orderbook):
                     self.del_order(time,seller)
 
 
-        # Add any remaining unmatched bids and asks to the order book
-
+        
         # print(f'Remaining bids: {[b.price for b in bids]}')
         # print(f'Remaining asks: {[a.price for a in asks]}')
         # print(f'Remaining buyers: {[a.price for a in buyers]}')
         # print(f'Remaining sellers: {[a.price for a in sellers]}')
-        
-        print(f'All remaining orders {[(p.price,p.otype,p.tid) for p in bids+asks]}')
+        #print(f'All remaining orders {[(p.price,p.otype,p.tid) for p in bids+asks]}')
 
-
+        # Add any remaining unmatched bids and asks to the order book
         for o in bids + asks:
             toid, response = self.add_order(o, verbose) #orders added with the same price are given as 1 quantity - big problem. 
             o.toid = toid
@@ -477,10 +468,9 @@ class Exchange(Orderbook):
                 print(f'RESPONSE: {response}')
 
         # Publish the updated order book
-
-        print("LOB AFTER: ")
+        # print("LOB AFTER: ")
         lob = self.publish_lob(time, False)
-        print (lob)
+        # print (lob)
 
         return transaction_records,lob
 
