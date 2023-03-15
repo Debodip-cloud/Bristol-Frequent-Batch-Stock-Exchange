@@ -108,7 +108,7 @@ class Trader:
         self.del_order(coid)  # delete the order
 
     # pylint: disable=unused-argument,no-self-use
-    def respond(self, time, lob, trade, verbose):
+    def respond(self, time, lob, trades, verbose):
         """
         specify how trader responds to events in the market
         this is a null action, expect it to be overloaded by specific algos

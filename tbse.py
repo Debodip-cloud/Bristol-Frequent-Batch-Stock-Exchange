@@ -217,8 +217,8 @@ def run_exchange(
     start_event.wait()
     orders_to_batch = [] 
     
-    batch_period = 200 # seconds
-    required_batch_number = 3
+    batch_period = 5 # seconds
+    required_batch_number = 1
     last_batch_time = 0
 
     while start_event.isSet():        
@@ -254,12 +254,12 @@ def run_exchange(
         #time seems to go from 8.5 to [42,end]        
         elapsed_time = virtual_time - last_batch_time
         if elapsed_time>=batch_period and required_batch_number !=0 :
-            #required_batch_number-=1; 
+            #required_batch_number-=1; #uncomment this for testing
             
             #eventually change to return (trades,lob,p*,q*) because this is what traders work with in BCS
             (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
-                #print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
+                print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
                 for trade in trades: 
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True

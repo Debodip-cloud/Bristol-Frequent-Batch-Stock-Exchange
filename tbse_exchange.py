@@ -365,7 +365,6 @@ class Exchange(Orderbook):
         new_asks = []
 
         if len(orders)==0:
-            #print("ended batch as there are no new orders")
             lob = self.publish_lob(time, False)
             return None,lob
                     
@@ -383,6 +382,7 @@ class Exchange(Orderbook):
         bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
         asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
 
+
         if(len(bids)==0):
             for o in asks:
                 self.add_order(order,verbose)
@@ -394,23 +394,24 @@ class Exchange(Orderbook):
                 self.add_order(order,verbose)
                 lob = self.publish_lob(time, False)
                 return None,lob
+            
+        
+        demand_lob = [(b.price,b.qty) for b in bids]
+        supply_lob = [(a.price,a.qty) for a in asks]
 
-        auction_price = (bids[0].price + asks[0].price) / 2 
+        supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
+        auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
+        # print(f'all bids {[b.price for b in bids]}')
+        # print(f'all asks {[a.price for a in asks]}')
+
+        print("\n")
+        print(f'supply curve {supply_curve}')
+        print(f'demand curve {demand_curve}')
+        print(f'new auction price {auction_price}')
 
         buyers = [b for b in bids if b.price >= auction_price]
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-
-        # print(f'Trade quantity is {trade_qty}')
-        # print(f'There are {len(new_bids)} new bids ')
-        # print(f'There are {len(new_asks)} new asks ')
-        # print(f'There are {len(bids)} total bids')
-        # print(f'There are {len(asks)} total asks')
-
-        # print(f'Auction price is {auction_price}')
-        # print(f'All bids: {[b.price for b in bids]}')
-        # print(f'All asks: {[a.price for a in asks]}')
-        
         # Initialize transaction records list
         transaction_records = []    
 
@@ -451,14 +452,6 @@ class Exchange(Orderbook):
                 if seller in old_asks: 
                     self.del_order(time,seller)
 
-
-        
-        # print(f'Remaining bids: {[b.price for b in bids]}')
-        # print(f'Remaining asks: {[a.price for a in asks]}')
-        # print(f'Remaining buyers: {[a.price for a in buyers]}')
-        # print(f'Remaining sellers: {[a.price for a in sellers]}')
-        #print(f'All remaining orders {[(p.price,p.otype,p.tid) for p in bids+asks]}')
-
         # Add any remaining unmatched bids and asks to the order book
         for o in bids + asks:
             toid, response = self.add_order(o, verbose) #orders added with the same price are given as 1 quantity - big problem. 
@@ -467,11 +460,14 @@ class Exchange(Orderbook):
                 print(f'TOID: order.toid={o.toid}')
                 print(f'RESPONSE: {response}')
 
-        # Publish the updated order book
+        #Publish the updated order book
         # print("LOB AFTER: ")
-        lob = self.publish_lob(time, False)
         # print (lob)
+        # print("\n")
 
+        #demand_curve,supply_curve = self.construct_curves()
+        #print(demand_curve,supply_curve)
+        lob = self.publish_lob(time, False)
         return transaction_records,lob
 
     def tape_dump(self, file_name, file_mode, tape_mode):
@@ -488,3 +484,69 @@ class Exchange(Orderbook):
             dumpfile.close()
             if tape_mode == 'wipe':
                 self.tape = []
+    
+
+    def find_equilibrium_price(self,supply_curve, demand_curve):
+        # Sort demand and supply curves by price
+        # demand_curve.sort()
+        # supply_curve.sort()
+
+        # Initialize variables
+        demand_quantity = 0
+        supply_quantity = 0
+        equilibrium_price = 501
+
+        if len(supply_curve)<=1 or len(demand_curve)<=1:
+            return equilibrium_price
+
+        # Iterate through demand and supply curves
+        for i in range(len(demand_curve)):
+            price, demand = demand_curve[i]
+            supply = supply_curve[i][1]
+
+            #demand_quantity += demand
+            #supply_quantity += supply
+
+            demand_quantity = demand
+            supply_quantity += supply
+
+            # If demand equals supply, we've found the equilibrium price
+            if demand_quantity == supply_quantity:
+                equilibrium_price = price
+                break
+            # If supply exceeds demand, keep iterating until we find the point where they intersect
+            elif supply_quantity > demand_quantity:
+                excess_supply = supply_quantity - demand_quantity
+                previous_price, previous_demand = demand_curve[i - 1]
+                previous_supply = supply_curve[i - 1][1]
+                # Use linear interpolation to estimate the equilibrium price
+                equilibrium_price = previous_price + (excess_supply / previous_demand) * (price - previous_price)
+                break
+
+        return equilibrium_price
+
+    def create_supply_demand_curves(self, supply_lob, demand_lob):
+        supply_curve = {}
+        demand_curve = {}
+        demand_qty = 0
+        supply_qty = 0
+
+        for i in range(len(supply_lob)):
+            price = supply_lob[i][0]
+            qty = supply_lob[i][1]
+            supply_qty += qty
+            supply_curve[price] = supply_qty
+
+        for i in (range(len(demand_lob))):
+            price = demand_lob[i][0]
+            qty = demand_lob[i][1]
+            demand_qty += qty
+            demand_curve[price] = demand_qty
+
+        supply_curve = [(price, supply_qty) for price, supply_qty in supply_curve.items()]
+        demand_curve = [(price, demand_qty) for price, demand_qty in demand_curve.items()]
+        supply_curve.sort(reverse=True)
+        demand_curve.sort(reverse=True)
+
+        return (supply_curve, demand_curve)
+    
