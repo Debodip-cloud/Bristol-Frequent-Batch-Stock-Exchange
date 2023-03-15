@@ -13,9 +13,9 @@ end_time = 600.0
 # Trader Schedule
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
-numZIC = 0
+numZIC = 5
 numZIP = 5
-numGDX = 5
+numGDX = 0
 numAA = 0
 numGVWY = 0
 numSHVR = 0
@@ -51,7 +51,7 @@ demand = {
 }
 
 # For single schedule: using config trader schedule, or command-line trader schedule.
-numTrials = 1
+numTrials = 30
 
 # For multiple schedules: using input csv file. 
 numSchedulesPerRatio = 1  # Number of schedules per ratio of traders in csv file.
