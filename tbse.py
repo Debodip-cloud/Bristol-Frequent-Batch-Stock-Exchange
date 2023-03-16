@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 100 #20 second batches seem reasonable
+    batch_period = 10 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -267,7 +267,6 @@ def run_exchange(
                     #change to send (trades,lob,curves,p*,q*)
                     q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
                         
-            
             orders_to_batch = []
             last_batch_time = virtual_time
             
@@ -302,15 +301,22 @@ def run_trader(
     """
     start_event.wait()
 
+    #putting variables here will mean traders can use latest demand curves to respond and get_order.
+    #Not 
+    p_eq = None
+    q_eq = None
+    demand_curve = None
+    supply_curve = None
+
     while start_event.isSet():
         time.sleep(0.01)
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
         trades = None
-        p_eq = None
-        q_eq = None
-        demand_curve = None
-        supply_curve = None
+        # p_eq = None
+        # q_eq = None
+        # demand_curve = None
+        # supply_curve = None
 
         # Will change this to pass in whole queue 
         while trader_q.empty() is False:

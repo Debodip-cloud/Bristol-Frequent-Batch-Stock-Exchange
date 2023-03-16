@@ -173,37 +173,51 @@ class TraderZic(Trader):
         :return: The trader order to be sent to the exchange
         """
 
-
         if len(self.orders) < 1:
             # no orders: return NULL
             order = None
         else:
             
             coid = max(self.orders.keys())
-            min_price = lob['bids']['worst']
-            max_price = lob['asks']['worst']
+            
+            min_price_lob = lob['bids']['worst']
+            max_price_lob = lob['asks']['worst']
             limit = self.orders[coid].price
             otype = self.orders[coid].otype
+            
+            #changing minimum and maximum prices calculation
+            if demand_curve!=None and supply_curve!=None:
+                min_price = min(demand_curve, key=lambda x: x[0])[0]
+                max_price = max(supply_curve, key=lambda x: x[0])[0]
+            else:
+                min_price = min_price_lob
+                max_price = max_price_lob
+
             if otype == 'Bid':
+                if min_price>limit:
+                    min_price=min_price_lob
                 quote_price = random.randint(min_price, limit)
             else:
+                if max_price<limit:
+                    max_price=max_price_lob
                 quote_price = random.randint(limit, max_price)
                 # NB should check it == 'Ask' and barf if not
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
 
-            if demand_curve is not None:
-                print(f"Time is {time} ")
-                print(f"demand curve {demand_curve}")
-                print(f'supply curve {supply_curve}')
-                print(f'otype was {otype}')
-                if(otype == 'Bid'):
-                    print(f'Agent about to make a bid between {min_price,limit}')
-                else:
-                    print(f'Agent about to make a bid between {limit,max_price}')
+            # if demand_curve is not None:
+            #     print(f"Time is {time} ")
+            #     print(f"demand curve {demand_curve}")
+            #     print(f'supply curve {supply_curve}')
+            #     print(f'auction price {p_eq}')
+            #     print(f'otype was {otype}')
+            #     if(otype == 'Bid'):
+            #         print(f'Agent about to make a bid between {min_price,limit}')
+            #     else:
+            #         print(f'Agent about to make a bid between {limit,max_price}')
 
-                print(f'Quote price was {quote_price}')    
+            #     print(f'Quote price was {quote_price}')    
         
         return order
 
