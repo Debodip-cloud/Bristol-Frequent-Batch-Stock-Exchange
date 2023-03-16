@@ -17,7 +17,7 @@ numZIC = 5
 numZIP = 0
 numGDX = 0
 numAA = 0
-numGVWY = 5
+numGVWY = 0
 numSHVR = 0
 
 # Order Schedule
