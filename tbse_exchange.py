@@ -366,7 +366,13 @@ class Exchange(Orderbook):
 
         if len(orders)==0:
             lob = self.publish_lob(time, False)
-            return None,lob
+            demand_lob = [(b.price,b.qty) for b in old_bids]
+            supply_lob = [(a.price,a.qty) for a in old_asks]
+
+            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
+
+            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
+            return None,lob,None,0,supply_curve,demand_curve
                     
         for order in orders: 
             if order.otype =='Bid':
@@ -386,14 +392,27 @@ class Exchange(Orderbook):
         if(len(bids)==0):
             for o in asks:
                 self.add_order(order,verbose)
-                lob = self.publish_lob(time, False)
-                return None,lob
+
+            demand_lob = [(b.price,b.qty) for b in old_bids]
+            supply_lob = [(a.price,a.qty) for a in asks]
+
+            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
+            lob = self.publish_lob(time, False)
+
+            return None,lob,None,0,supply_curve,demand_curve
        
         if(len(asks)==0):
             for o in bids:
                 self.add_order(order,verbose)
-                lob = self.publish_lob(time, False)
-                return None,lob
+            lob = self.publish_lob(time, False)
+            
+            demand_lob = [(b.price,b.qty) for b in bids]
+            supply_lob = [(a.price,a.qty) for a in old_asks]
+
+            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
+
+            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
+            return None,lob,None,0,supply_curve,demand_curve
             
         
         demand_lob = [(b.price,b.qty) for b in bids]
@@ -404,19 +423,17 @@ class Exchange(Orderbook):
         # print(f'all bids {[b.price for b in bids]}')
         # print(f'all asks {[a.price for a in asks]}')
 
-        print("\n")
-        print(f'supply curve {supply_curve}')
-        print(f'demand curve {demand_curve}')
-        print(f'new auction price {auction_price}')
+        # print("\n")
+        # print(f'supply curve {supply_curve}')
+        # print(f'demand curve {demand_curve}')
+        # print(f'new auction price {auction_price}')
 
         buyers = [b for b in bids if b.price >= auction_price]
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-        # Initialize transaction records list
-        transaction_records = []    
+        transaction_records = [] # Initialize transaction records list     
 
         while buyers and sellers and trade_qty > 0:
-
             buyer = buyers[0]
             seller = sellers[0]
             trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) 
@@ -460,15 +477,8 @@ class Exchange(Orderbook):
                 print(f'TOID: order.toid={o.toid}')
                 print(f'RESPONSE: {response}')
 
-        #Publish the updated order book
-        # print("LOB AFTER: ")
-        # print (lob)
-        # print("\n")
-
-        #demand_curve,supply_curve = self.construct_curves()
-        #print(demand_curve,supply_curve)
         lob = self.publish_lob(time, False)
-        return transaction_records,lob
+        return transaction_records,lob,auction_price,len(transaction_records),demand_curve,supply_curve
 
     def tape_dump(self, file_name, file_mode, tape_mode):
         """

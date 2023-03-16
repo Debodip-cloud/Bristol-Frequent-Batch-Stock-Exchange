@@ -215,13 +215,14 @@ def run_exchange(
     """
     completed_coid = {}
     start_event.wait()
-    orders_to_batch = [] 
     
-    batch_period = 5 # seconds
+    orders_to_batch = [] 
+    batch_period = 20 # seconds
     required_batch_number = 1
     last_batch_time = 0
 
     while start_event.isSet():        
+        
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
         while kill_q.empty() is False:
@@ -247,33 +248,24 @@ def run_exchange(
                 if o.tid == order.tid:
                     exchange.del_order(time,o)       
             
-
             orders_to_batch.append(order) #adding order to batched orders
-
 
         #time seems to go from 8.5 to [42,end]        
         elapsed_time = virtual_time - last_batch_time
         if elapsed_time>=batch_period and required_batch_number !=0 :
             #required_batch_number-=1; #uncomment this for testing
             
-            #eventually change to return (trades,lob,p*,q*) because this is what traders work with in BCS
-            (trades, lob) = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
+            #eventually change to return (trades,lob,curves,p*,q*) because this is what traders work with in BCS
+            trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
                 print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
                 for trade in trades: 
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
                     
-                    
                 for q in trader_qs:
-                    #Change this to pass [trades,LOB] or maybe [trades,lob,p*,q*] and then run_trader can change to iterate through trades
-                    #q.put([trade, completed_order, lob]) 
-
-                    # for o in orders_to_batch:
-                    #     if o.coid == trade['coid']:
-                    #         completed_order = o
-                    #         break
-                    q.put([trades,lob]) 
+                    #change to send (trades,lob,curves,p*,q*)
+                    q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
                         
             
             orders_to_batch = []
@@ -315,28 +307,23 @@ def run_trader(
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
         trade = None
-        order = None
 
         # Will change this to pass in whole queue 
         while trader_q.empty() is False:
-            [trades,lob] = trader_q.get(block=False)
+            [trades, lob,p_eq,q_eq,demand_curve,supply_curve] = trader_q.get(block=False)
             
             for trade in trades: 
                 #Sending None order which should be ok
                 #If not then add orders_to_batch in item sent in queue 
                 if trade['party1'] == trader.tid:
-                    trader.bookkeep(trade, order, bookkeep_verbose, virtual_time)
+                    trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
                 if trade['party2'] == trader.tid:
-                    trader.bookkeep(trade, order, bookkeep_verbose, virtual_time)
-            
-            
+                    trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
             time1 = time.time()
-            trader.respond(virtual_time, lob, trade, respond_verbose) #Need to pass list of trades here
+            trader.respond(virtual_time, lob, None, respond_verbose) #Need to pass list of trades here
             time2 = time.time()
             trader.times[1] += time2 - time1
             trader.times[3] += 1
-
-            #print(f'trader {trader.tid} is dealing with order {order} at time {virtual_time}' )
 
         lob = exchange.publish_lob(virtual_time, False)
         time1 = time.time()
