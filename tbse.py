@@ -306,7 +306,11 @@ def run_trader(
         time.sleep(0.01)
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
-        trade = None
+        trades = None
+        p_eq = None
+        q_eq = None
+        demand_curve = None
+        supply_curve = None
 
         # Will change this to pass in whole queue 
         while trader_q.empty() is False:
@@ -320,16 +324,16 @@ def run_trader(
                 if trade['party2'] == trader.tid:
                     trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
             time1 = time.time()
-            trader.respond(virtual_time, lob, None, respond_verbose) #Need to pass list of trades here
+            trader.respond(virtual_time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,respond_verbose) #Need to pass list of trades here
             time2 = time.time()
             trader.times[1] += time2 - time1
             trader.times[3] += 1
 
         lob = exchange.publish_lob(virtual_time, False)
         time1 = time.time()
-        trader.respond(virtual_time, lob, trade, respond_verbose) #may need to pass trades. Don't want to run this until all trades have been processed
+        trader.respond(virtual_time,p_eq,q_eq,demand_curve,supply_curve, lob, trades, respond_verbose) #may need to pass trades. Don't want to run this until all trades have been processed
         time2 = time.time()
-        order = trader.get_order(virtual_time, time_left, lob)
+        order = trader.get_order(virtual_time,p_eq,q_eq,demand_curve,supply_curve, time_left, lob)
         time3 = time.time()
         trader.times[1] += time2 - time1
         trader.times[3] += 1

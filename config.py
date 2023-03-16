@@ -14,7 +14,7 @@ end_time = 600.0
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
 numZIC = 5
-numZIP = 5
+numZIP = 0
 numGDX = 0
 numAA = 0
 numGVWY = 5

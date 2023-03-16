@@ -108,7 +108,7 @@ class Trader:
         self.del_order(coid)  # delete the order
 
     # pylint: disable=unused-argument,no-self-use
-    def respond(self, time, lob, trades, verbose):
+    def respond(self,time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,verbose):
         """
         specify how trader responds to events in the market
         this is a null action, expect it to be overloaded by specific algos
@@ -121,7 +121,8 @@ class Trader:
         return None
 
     # pylint: disable=unused-argument,no-self-use
-    def get_order(self, time, countdown, lob):
+   
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Get's the traders order based on the current state of the market
         :param time: Current time
@@ -138,7 +139,7 @@ class TraderGiveaway(Trader):
     even dumber than a ZI-U: just give the deal away
     (but never makes a loss)
     """
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Get's giveaway traders order - in this case the price is just the limit price from the customer order
         :param time: Current time
@@ -163,7 +164,7 @@ class TraderGiveaway(Trader):
 class TraderZic(Trader):
     """ Trader subclass ZI-C
     After Gode & Sunder 1993"""
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Gets ZIC trader, limit price is randomly selected
         :param time: Current time
@@ -195,7 +196,7 @@ class TraderShaver(Trader):
     """Trader subclass Shaver
     shaves a penny off the best price
     if there is no best price, creates "stub quote" at system max/min"""
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Get's Shaver trader order by shaving/adding a penny to current best bid
         :param time: Current time
@@ -233,7 +234,7 @@ class TraderSniper(Trader):
     Based on Shaver,
     "lurks" until t remaining < threshold% of the trading session
     then gets increasing aggressive, increasing "shave thickness" as t runs out"""
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         :param time: Current time
         :param countdown: Time until end of market session
@@ -301,7 +302,7 @@ class TraderZip(Trader):
         self.prev_best_ask_p = None
         self.prev_best_ask_q = None
 
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
 
         :param time: Current time
@@ -332,7 +333,7 @@ class TraderZip(Trader):
         return order
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-    def respond(self, time, lob, trade, verbose):
+    def respond(self,time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,verbose):
         """
         update margin on basis of what happened in marke
         ZIP trader responds to market events, altering its margin
@@ -723,7 +724,7 @@ class TraderAa(Trader):
                 self.sell_target = lim
 
     # pylint: disable=too-many-branches
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Creates an AA trader's order
         :param time: Current time
@@ -779,7 +780,7 @@ class TraderAa(Trader):
         return order
 
     # pylint: disable=too-many-branches
-    def respond(self, time, lob, trade, verbose):
+    def respond(self,time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,verbose):
         """
         Updates AA trader's internal variables based on activities on the LOB
         Beginning nicked from ZIP
@@ -901,7 +902,7 @@ class TraderGdx(Trader):
         self.remaining_offer_ops = 25
         self.values = [[0 for _ in range(self.remaining_offer_ops)] for _ in range(self.holdings)]
 
-    def get_order(self, time, countdown, lob):
+    def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
         Creates a GDX trader's order
         :param time: Current time
@@ -1058,7 +1059,7 @@ class TraderGdx(Trader):
             return 0
         return (accepted_bids_lower + asks_lower) / (accepted_bids_lower + asks_lower + unaccepted_bids_greater)
 
-    def respond(self, time, lob, trade, verbose):
+    def respond(self,time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,verbose):
         """
         Updates GDX trader's internal variables based on activities on the LOB
         :param time: current time
