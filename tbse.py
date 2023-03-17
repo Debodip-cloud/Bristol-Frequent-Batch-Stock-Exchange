@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 10 #20 second batches seem reasonable
+    batch_period = 20 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -329,6 +329,7 @@ def run_trader(
                     trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
                 if trade['party2'] == trader.tid:
                     trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
+            
             time1 = time.time()
             trader.respond(virtual_time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,respond_verbose) #Need to pass list of trades here
             time2 = time.time()
@@ -696,12 +697,15 @@ if __name__ == "__main__":
                         trial = trial - 1
                         start_session_event.clear()
                         time.sleep(0.5)
+                        print("In sleep 1")
+                        print("Hitting this whenever Giveway agents are used")
                 except Exception as e:  # pylint: disable=broad-except
                     print("Error: Market session failed, trying again.")
                     print(e)
                     trial = trial - 1
                     start_session_event.clear()
                     time.sleep(0.5)
+                    print("In sleep 2")
                 tdump.flush()
                 trial = trial + 1
 
@@ -793,12 +797,14 @@ if __name__ == "__main__":
                                 trial_number = trial_number - 1
                                 start_session_event.clear()
                                 time.sleep(0.5)
+                                print("In sleep 3")
                         except Exception as e:  # pylint: disable=broad-except
                             print("Market session failed. Trying again. " + str(e))
                             trial = trial - 1
                             trial_number = trial_number - 1
                             start_session_event.clear()
                             time.sleep(0.5)
+                            print("In sleep 4")
                         tdump.flush()
                         trial = trial + 1
                         trial_number = trial_number + 1

@@ -18,7 +18,7 @@ numZIP = 0
 numGDX = 0
 numAA = 0
 numGVWY = 5
-numSHVR = 0
+numSHVR = 1
 
 # Order Schedule
 useOffset = True  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True

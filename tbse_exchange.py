@@ -420,8 +420,8 @@ class Exchange(Orderbook):
 
         supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
         auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
-        print(f'all bids {[b.price for b in bids]}')
-        print(f'all asks {[a.price for a in asks]}')
+        # print(f'all bids {[b.price for b in bids]}')
+        # print(f'all asks {[a.price for a in asks]}')
 
         # print("\n")
         # print(f'supply curve {supply_curve}')
