@@ -230,6 +230,7 @@ class TraderShaver(Trader):
             otype = self.orders[coid].otype
 
             if demand_curve!=None and supply_curve!=None:
+
                 best_bid = min(demand_curve, key=lambda x: x[0])[0]+1
                 best_ask = max(supply_curve, key=lambda x: x[0])[0]-1
             else:
@@ -240,9 +241,15 @@ class TraderShaver(Trader):
                 quote_price=best_bid
             else:
                 quote_price = best_ask
+            
+            quote_price = min(quote_price, limit_price)
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
+
+            if(quote_price>=500 or quote_price<=0):
+                print(f"There was a problem with the limit price of order {quote_price}")
+                print(f"demand curve {demand_curve} supply curve {supply_curve}")
         return order
 
 
@@ -269,18 +276,21 @@ class TraderSniper(Trader):
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
 
-            if otype == 'Bid':
-                if lob['bids']['n'] > 0:
-                    quote_price = lob['bids']['best'] + shave
-                    quote_price = min(quote_price, limit_price)
-                else:
-                    quote_price = lob['bids']['worst']
+            if demand_curve!=None and supply_curve!=None:
+
+                best_bid = min(demand_curve, key=lambda x: x[0])[0]
+                best_ask = max(supply_curve, key=lambda x: x[0])[0]
             else:
-                if lob['asks']['n'] > 0:
-                    quote_price = lob['asks']['best'] - shave
-                    quote_price = min(quote_price, limit_price)
-                else:
-                    quote_price = lob['asks']['worst']
+                best_bid = lob['bids']['worst'] - shave
+                best_ask = lob['asks']['worst'] + shave
+
+
+            if otype == 'Bid':
+                    quote_price = best_bid+shave
+            else:
+                    quote_price = best_ask-shave
+            
+            quote_price = min(quote_price, limit_price)    
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
