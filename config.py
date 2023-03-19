@@ -18,11 +18,11 @@ numZIP = 0
 numGDX = 0
 numAA = 0
 numGVWY = 5
-numSHVR = 1
+numSHVR = 5
 
 # Order Schedule
-useOffset = True  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True
-useInputFile = True  # Use an input file to define order schedule (e.g. Real World Trading data)
+useOffset = False  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True
+useInputFile = False  # Use an input file to define order schedule (e.g. Real World Trading data)
 input_file = "RWD/IBM-310817.csv" # Path to real world data input file
 stepmode = 'fixed'  # Valid values: 'fixed', 'jittered', 'random'
 timemode = 'periodic'  # Valid values: 'periodic', 'drip-fixed', 'drip-jitter', 'drip-poisson'
@@ -51,7 +51,7 @@ demand = {
 }
 
 # For single schedule: using config trader schedule, or command-line trader schedule.
-numTrials = 1
+numTrials = 2
 
 # For multiple schedules: using input csv file. 
 numSchedulesPerRatio = 1  # Number of schedules per ratio of traders in csv file.

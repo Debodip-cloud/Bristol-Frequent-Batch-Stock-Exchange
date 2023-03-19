@@ -386,7 +386,7 @@ def market_session(
     start_time = time.time()
 
     orders_verbose = False
-    process_verbose = False
+    process_verbose = False 
     respond_verbose = False
     bookkeep_verbose = False
     # create a bunch of traders

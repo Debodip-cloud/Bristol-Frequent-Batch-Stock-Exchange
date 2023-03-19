@@ -221,52 +221,28 @@ class TraderShaver(Trader):
         :param lob: Limit order book
         :return: The trader order to be sent to the exchange
         """
-
-
-
         if len(self.orders) < 1:
             order = None
         else:
+
             coid = max(self.orders.keys())
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
-            
-            #changing minimum and maximum prices calculation
-
 
             if demand_curve!=None and supply_curve!=None:
-                best_bid = max(demand_curve, key=lambda x: x[0])[0]
-                best_ask = min(supply_curve, key=lambda x: x[0])[0]
+                best_bid = min(demand_curve, key=lambda x: x[0])[0]+1
+                best_ask = max(supply_curve, key=lambda x: x[0])[0]-1
             else:
-                best_bid = lob['bids']['best']
-                best_ask = lob['asks']['best']
+                best_bid = lob['bids']['worst']
+                best_ask = lob['asks']['worst']
 
-            
-                
             if otype == 'Bid':
-                if lob['bids']['n'] > 0:
-                    quote_price = lob['bids']['best'] + 1
-                    #quote_price = best_bid + 1
-                    quote_price = min(quote_price, limit_price)
-                else:
-                    quote_price = lob['bids']['worst']
+                quote_price=best_bid
             else:
-                if lob['asks']['n'] > 0:
-                    quote_price = lob['asks']['best'] - 1
-                    #quote_price = best_ask-1
-                    quote_price = min(quote_price, limit_price)
-                else:
-                    quote_price = lob['asks']['worst']
+                quote_price = best_ask
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
-
-        # if order!=None:
-        #     print("\n")
-        #     print(f'demand curve {demand_curve}')
-        #     print(f'supply curve {supply_curve}')
-        #     print(f'auction price {p_eq}')
-        #     print(f"order returned {order.otype,order.price}")    
         return order
 
 
