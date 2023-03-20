@@ -365,6 +365,15 @@ class TraderZip(Trader):
             quote_price = int(self.limit * (1 + self.margin))
             self.price = quote_price
 
+            #if demand_curve!=None and supply_curve!=None and self.job=='Bid':
+                # print(f"time {time}")
+                # print(f'demand curve {demand_curve}')
+                # print(f'supply curve {supply_curve}')
+                # print(f'limit price {self.limit}')
+                # print(f'quote price {quote_price}')
+                # print(f'auction price {p_eq}')
+                #print(f'lob {lob}')
+
             order = Order(self.tid, self.job, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
@@ -382,6 +391,23 @@ class TraderZip(Trader):
         :param verbose: Should verbose logging be printed to console
         """
 
+        if len(trades)==0:
+            trade = None
+        else:
+            trade = trades[0]
+
+        if demand_curve!=None and supply_curve!=None:
+            best_bid = max(demand_curve, key=lambda x: x[0])[0]
+            best_ask = min(supply_curve, key=lambda x: x[0])[0]
+
+        elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+            best_bid = lob['bids']['best'] 
+            best_ask = lob['asks']['best'] 
+        else:
+            best_bid = None
+            best_ask = None
+
+        
         def target_up(price):
             """
             generate a higher target price by randomly perturbing given price
@@ -446,7 +472,8 @@ class TraderZip(Trader):
         bid_improved = False
         bid_hit = False
 
-        lob_best_bid_p = lob['bids']['best']
+        #lob_best_bid_p = lob['bids']['best']
+        lob_best_bid_p = best_bid
         lob_best_bid_q = None
         if lob_best_bid_p is not None:
             # non-empty bid LOB
@@ -463,8 +490,10 @@ class TraderZip(Trader):
                 bid_hit = True
         elif self.prev_best_bid_p is not None:
             # the bid LOB has been emptied: was it cancelled or hit?
-            last_tape_item = lob['tape'][-1]
-            if last_tape_item['type'] == 'Cancel':
+            last_tape_item = lob['tape'][-1] #might have to check if has been cancelled at some point during batch 
+            #for item in lob['tape'] check if cancel happened with price of
+            if last_tape_item['type'] == 'Cancel': 
+                print("Last bid was cancelled") #test
                 bid_hit = False
             else:
                 bid_hit = True
@@ -472,7 +501,8 @@ class TraderZip(Trader):
         # what, if anything, has happened on the ask LOB?
         ask_improved = False
         ask_lifted = False
-        lob_best_ask_p = lob['asks']['best']
+        #lob_best_ask_p = lob['asks']['best']
+        lob_best_ask_p = best_ask
         lob_best_ask_q = None
         if lob_best_ask_p is not None:
             # non-empty ask LOB
@@ -491,6 +521,7 @@ class TraderZip(Trader):
             # the ask LOB is empty now but was not previously: canceled or lifted?
             last_tape_item = lob['tape'][-1]
             if last_tape_item['type'] == 'Cancel':
+                print("Last bid was cancelled") # test
                 ask_lifted = False
             else:
                 ask_lifted = True

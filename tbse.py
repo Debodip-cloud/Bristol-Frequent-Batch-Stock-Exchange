@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 20 #20 second batches seem reasonable
+    batch_period = 10 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -301,6 +301,7 @@ def run_trader(
 
     #putting variables here will mean traders can use latest demand curves to respond and get_order.
     #Not 
+    trades = []
     p_eq = None
     q_eq = None
     demand_curve = None
@@ -310,7 +311,6 @@ def run_trader(
         time.sleep(0.01)
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
-        trades = None
         # p_eq = None
         # q_eq = None
         # demand_curve = None
