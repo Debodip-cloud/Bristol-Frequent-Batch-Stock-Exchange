@@ -6,6 +6,7 @@ import sys
 
 from tbse_msg_classes import Order
 from tbse_sys_consts import TBSE_SYS_MAX_PRICE, TBSE_SYS_MIN_PRICE
+import time as time1
 
 
 # pylint: disable=too-many-instance-attributes
@@ -229,27 +230,33 @@ class TraderShaver(Trader):
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
 
-            if demand_curve!=None and supply_curve!=None:
+            best_bid = 500
+            best_ask = 500
 
-                best_bid = min(demand_curve, key=lambda x: x[0])[0]+1
-                best_ask = max(supply_curve, key=lambda x: x[0])[0]-1
+            if demand_curve!=None and supply_curve!=None:
+                best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
+                best_ask = min(supply_curve, key=lambda x: x[0])[0]-1
+
+            elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+                best_bid = lob['bids']['best'] + 1
+                best_ask = lob['asks']['best'] -1 
+                # print("In best bids and asks LOB not demand curves")
             else:
-                best_bid = lob['bids']['worst']
+                best_bid = lob['bids']['worst'] 
                 best_ask = lob['asks']['worst']
 
             if otype == 'Bid':
-                quote_price=best_bid
+                quote_price= best_bid
+                quote_price = min(quote_price, limit_price)
             else:
                 quote_price = best_ask
-            
-            quote_price = min(quote_price, limit_price)
+                quote_price = max(quote_price, limit_price)
+
+            #quote_price = min(quote_price, limit_price)
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
-
-            if(quote_price>=500 or quote_price<=0):
-                print(f"There was a problem with the limit price of order {quote_price}")
-                print(f"demand curve {demand_curve} supply curve {supply_curve}")
+            
         return order
 
 

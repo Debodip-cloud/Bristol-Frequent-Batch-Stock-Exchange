@@ -341,6 +341,10 @@ def run_trader(
         trader.respond(virtual_time,p_eq,q_eq,demand_curve,supply_curve, lob, trades, respond_verbose) #may need to pass trades. Don't want to run this until all trades have been processed
         time2 = time.time()
         order = trader.get_order(virtual_time,p_eq,q_eq,demand_curve,supply_curve, time_left, lob)
+        
+        # if trader.ttype == 'SHVR' and virtual_time>500 and virtual_time<505:
+        #     print(f'Trader has ID {trader.tid} and has just generated an order with price {order.price} and type {order.otype}')
+        
         time3 = time.time()
         trader.times[1] += time2 - time1
         trader.times[3] += 1
@@ -692,13 +696,16 @@ if __name__ == "__main__":
                         order_sched,
                         start_session_event,
                         False)
+                    
+                    #print(f"There are {NUM_THREADS} number of threads")
 
                     if NUM_THREADS != trader_count + 2: #traders + exchange + market thread
                         trial = trial - 1
                         start_session_event.clear()
                         time.sleep(0.5)
-                        print("In sleep 1")
-                        print("Hitting this whenever Giveway agents are used")
+                        print("\n")
+                        print("Hitting this whenever Shaver agents are used")
+                        print("\n")
                 except Exception as e:  # pylint: disable=broad-except
                     print("Error: Market session failed, trying again.")
                     print(e)
