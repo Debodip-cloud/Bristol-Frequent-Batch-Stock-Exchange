@@ -255,16 +255,14 @@ def run_exchange(
         if elapsed_time>=batch_period and required_batch_number !=0 :
             #required_batch_number-=1; #uncomment this for testing
             
-            #eventually change to return (trades,lob,curves,p*,q*) because this is what traders work with in BCS
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
-                print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
+                print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {round(p_eq,2)}')
                 for trade in trades: 
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
                     
                 for q in trader_qs:
-                    #change to send (trades,lob,curves,p*,q*)
                     q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
                         
             orders_to_batch = []

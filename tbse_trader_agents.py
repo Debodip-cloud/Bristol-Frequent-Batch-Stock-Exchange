@@ -256,7 +256,7 @@ class TraderShaver(Trader):
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
-            
+
         return order
 
 
@@ -294,8 +294,11 @@ class TraderSniper(Trader):
 
             if otype == 'Bid':
                     quote_price = best_bid+shave
+                    quote_price = min(quote_price, limit_price)    
+
             else:
                     quote_price = best_ask-shave
+                    quote_price = max(quote_price, limit_price)  
             
             quote_price = min(quote_price, limit_price)    
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
