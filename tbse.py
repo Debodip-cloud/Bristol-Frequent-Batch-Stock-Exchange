@@ -319,6 +319,12 @@ def run_trader(
         # Will change this to pass in whole queue 
         while trader_q.empty() is False:
             [trades, lob,p_eq,q_eq,demand_curve,supply_curve] = trader_q.get(block=False)
+
+            # print(f'supply curve {supply_curve}')
+            # print(f'demand curve {demand_curve}')
+            # print(f'auction price {p_eq}')
+            # print(f'number of trades {len(trades)}')
+
             
             for trade in trades: 
                 #Sending None order which should be ok

@@ -496,7 +496,7 @@ class Exchange(Orderbook):
                 self.tape = []
     
 
-    def find_equilibrium_price(self,supply_curve, demand_curve):
+    def find_equilibrium_price_old(self,supply_curve, demand_curve):
         # Sort demand and supply curves by price
         # demand_curve.sort()
         # supply_curve.sort()
@@ -534,6 +534,41 @@ class Exchange(Orderbook):
                 break
 
         return equilibrium_price
+    
+    def find_equilibrium_price(self,supply, demand):
+        # Initialize variables to store the best price and the smallest net surplus
+        best_price = 501
+        smallest_net_surplus = 1000
+
+        # Loop over the prices in the demand curve and find the best price
+        for price, demand_qty in demand:
+            # Find the quantity of the good supplied at the current price
+            supply_qty = 0
+            supply_qty = [(x[0],x[1]) for x in supply if price>x[0]]
+
+            
+            if supply_qty == []:
+                break
+            else:
+                supply_price,supply_qty = supply_qty[0]     
+            
+            # If the quantity supplied is less than the quantity demanded, skip to the next price
+            if supply_qty < demand_qty:
+                break
+            
+            # Calculate the consumer surplus and producer surplus at the current price
+            consumer_surplus = demand_qty
+            producer_surplus = supply_qty
+            
+            net_surplus = abs(consumer_surplus - producer_surplus)
+
+            if net_surplus<=smallest_net_surplus:
+                best_price = supply_price
+                smallest_net_surplus = net_surplus
+            
+
+        # Return the best price
+        return best_price
 
     def create_supply_demand_curves(self, supply_lob, demand_lob):
         supply_curve = {}
