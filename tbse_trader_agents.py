@@ -324,8 +324,8 @@ class TraderZip(Trader):
         self.job = None  # this is 'Bid' or 'Ask' depending on customer order
         self.active = False  # gets switched to True while actively working an order
         self.prev_change = 0  # this was called last_d in Cliff'97
-        self.beta = 0.1 + 0.2 * random.random()  # learning rate
-        self.momentum = 0.3 * random.random()  # momentum
+        self.beta = 0.1 + 0.2 * random.random()  # learning rate #0.1 + 0.2 * random.random()
+        self.momentum = 0.5 * random.random()  # momentum #0.5 * random.random()
         self.ca = 0.10  # self.ca & .cr were hard-coded in '97 but parameterised later
         self.cr = 0.10
         self.margin = None  # this was called profit in Cliff'97
@@ -365,13 +365,14 @@ class TraderZip(Trader):
             quote_price = int(self.limit * (1 + self.margin))
             self.price = quote_price
 
-            #if demand_curve!=None and supply_curve!=None and self.job=='Bid':
-                # print(f"time {time}")
-                # print(f'demand curve {demand_curve}')
-                # print(f'supply curve {supply_curve}')
-                # print(f'limit price {self.limit}')
-                # print(f'quote price {quote_price}')
-                # print(f'auction price {p_eq}')
+            if demand_curve!=None and supply_curve!=None and self.job=='Bid':
+                print("\n")
+                print(f"time {time}")
+                print(f'demand curve {demand_curve}')
+                print(f'supply curve {supply_curve}')
+                print(f'limit price {self.limit}')
+                print(f'quote price {quote_price}')
+                print(f'auction price {p_eq}')
                 #print(f'lob {lob}')
 
             order = Order(self.tid, self.job, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
@@ -396,7 +397,7 @@ class TraderZip(Trader):
         else:
             trade = trades[0]
 
-        if demand_curve!=None and supply_curve!=None:
+        if demand_curve!=None and supply_curve!=None: 
             best_bid = max(demand_curve, key=lambda x: x[0])[0]
             best_ask = min(supply_curve, key=lambda x: x[0])[0]
 
