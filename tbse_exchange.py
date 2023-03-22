@@ -543,18 +543,13 @@ class Exchange(Orderbook):
         # Loop over the prices in the demand curve and find the best price
         for price, demand_qty in demand:
             # Find the quantity of the good supplied at the current price
-            suppliers = [(x[0],x[1]) for x in supply if price>x[0]]
+            suppliers = [(x[0],x[1]) for x in supply if price>=x[0]]
             
             if suppliers == []:
-                print("breaking since there are no suppliers left")
                 break
             else:
                 supply_price,supply_qty = suppliers[0]     
-            
-            # If the quantity supplied is less than the quantity demanded, skip to the next price
-            # if supply_qty < demand_qty:
-            #     print("breaking since there are no suppliers left")
-            #     break
+        
             
             # Calculate the consumer surplus and producer surplus at the current price
             consumer_surplus = demand_qty
@@ -565,14 +560,6 @@ class Exchange(Orderbook):
             if net_surplus<=smallest_net_surplus:
                 best_price = supply_price
                 smallest_net_surplus = net_surplus
-
-            print("supply quality at price "+str(price)+" is "+str(suppliers))
-            print("consumer surplus "+str(consumer_surplus))
-            print("producer surplus "+str(producer_surplus))
-            print("net surplus "+str(net_surplus))
-            print("\n")
-
-            
 
         # Return the best price
         return best_price

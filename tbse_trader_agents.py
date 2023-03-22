@@ -230,14 +230,14 @@ class TraderShaver(Trader):
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
 
-            best_bid = 500
-            best_ask = 500
+            # best_bid = 500
+            # best_ask = 500
 
-            if demand_curve!=None and supply_curve!=None:
-                best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
-                best_ask = min(supply_curve, key=lambda x: x[0])[0]-1
+            # if demand_curve!=None and supply_curve!=None:
+            #     best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
+            #     best_ask = min(supply_curve, key=lambda x: x[0])[0]-1
 
-            elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+            if lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
                 best_bid = lob['bids']['best'] + 1
                 best_ask = lob['asks']['best'] -1 
                 # print("In best bids and asks LOB not demand curves")
@@ -324,8 +324,8 @@ class TraderZip(Trader):
         self.job = None  # this is 'Bid' or 'Ask' depending on customer order
         self.active = False  # gets switched to True while actively working an order
         self.prev_change = 0  # this was called last_d in Cliff'97
-        self.beta = 0.1 + 0.2 * random.random()  # learning rate #0.1 + 0.2 * random.random()
-        self.momentum = 0.5 * random.random()  # momentum #0.5 * random.random()
+        self.beta = 0.2 + 0.2 * random.random()  # learning rate #0.1 + 0.2 * random.random()
+        self.momentum = 0.3 * random.random()  # momentum #0.3 * random.random()
         self.ca = 0.10  # self.ca & .cr were hard-coded in '97 but parameterised later
         self.cr = 0.10
         self.margin = None  # this was called profit in Cliff'97
@@ -339,6 +339,7 @@ class TraderZip(Trader):
         self.prev_best_bid_q = None
         self.prev_best_ask_p = None
         self.prev_best_ask_q = None
+        self.last_batch = None
 
     def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
@@ -365,16 +366,10 @@ class TraderZip(Trader):
             quote_price = int(self.limit * (1 + self.margin))
             self.price = quote_price
 
-            if demand_curve!=None and supply_curve!=None and self.job=='Bid':
+            if self.job=='Bid':
                 print("\n")
-                print(f"time {time}")
-                print(f'demand curve {demand_curve}')
-                print(f'supply curve {supply_curve}')
-                print(f'limit price {self.limit}')
-                print(f'quote price {quote_price}')
-                print(f'auction price {p_eq}')
-                #print(f'lob {lob}')
-
+                print(f'limit price,quote price and auction price {self.orders[coid].price,quote_price,p_eq} at time {time}')
+        
             order = Order(self.tid, self.job, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
@@ -397,17 +392,43 @@ class TraderZip(Trader):
         else:
             trade = trades[0]
 
-        if demand_curve!=None and supply_curve!=None: 
-            best_bid = max(demand_curve, key=lambda x: x[0])[0]
-            best_ask = min(supply_curve, key=lambda x: x[0])[0]
+        # if demand_curve!=None and supply_curve!=None: 
+            
+        #     if(p_eq==501): #there were no trades in the batch so can use
+        #         best_bid = max(demand_curve, key=lambda x: x[0])[0]
+        #         best_ask = min(supply_curve, key=lambda x: x[0])[0]
 
-        elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
-            best_bid = lob['bids']['best'] 
-            best_ask = lob['asks']['best'] 
+        #     else:
+        #         remaining_bids = [price for price,_ in demand_curve if price<p_eq or p_eq==501]
+        #         remaining_asks = [price for price,_ in supply_curve if price>p_eq or p_eq==501]
+
+        #         # print("\n")
+        #         # print(f"demand curve: {demand_curve}")
+        #         # print(f"supply curve: {supply_curve}")
+        #         # print(f"remaining asks {remaining_asks}")
+        #         # print(f"remaining bids {remaining_bids}")
+        #         # print(f"auction price {p_eq}")
+        #         # print(f"number of trades {q_eq}")
+        #         # print("\n")
+
+        #         if remaining_bids!=[]:
+        #             best_bid = remaining_bids[0]
+        #         else:
+        #             best_bid = None
+        #         if remaining_asks!=[]:
+        #             best_ask = remaining_asks[0]
+        #         else:
+        #             best_ask = None
+
+        # else:
+        #     best_bid = None
+        #     best_ask = None
+
+        #ONLY RESPOND (ADJUST PARAMETERS) WHEN NEW BATCH HAS BEEN PROCESSED
+        if self.last_batch==(demand_curve,supply_curve):
+            return
         else:
-            best_bid = None
-            best_ask = None
-
+            self.last_batch = (demand_curve,supply_curve)
         
         def target_up(price):
             """
@@ -473,8 +494,8 @@ class TraderZip(Trader):
         bid_improved = False
         bid_hit = False
 
-        #lob_best_bid_p = lob['bids']['best']
-        lob_best_bid_p = best_bid
+        lob_best_bid_p = lob['bids']['best']
+        #lob_best_bid_p = best_bid #CHANGE HERE
         lob_best_bid_q = None
         if lob_best_bid_p is not None:
             # non-empty bid LOB
@@ -502,8 +523,8 @@ class TraderZip(Trader):
         # what, if anything, has happened on the ask LOB?
         ask_improved = False
         ask_lifted = False
-        #lob_best_ask_p = lob['asks']['best']
-        lob_best_ask_p = best_ask
+        lob_best_ask_p = lob['asks']['best']
+        #lob_best_ask_p = best_ask #CHANGE HERE
         lob_best_ask_q = None
         if lob_best_ask_p is not None:
             # non-empty ask LOB

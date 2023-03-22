@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 20 #20 second batches seem reasonable
+    batch_period = 10 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -257,7 +257,11 @@ def run_exchange(
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
+                print("\n")
                 print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {round(p_eq,2)}')
+                # print(f'Supply Curve: {supply_curve}')
+                # print(f'Demand Curve: {demand_curve}')
+                #print("\n")
                 for trade in trades: 
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
@@ -311,24 +315,11 @@ def run_trader(
         time.sleep(0.01)
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
-        # p_eq = None
-        # q_eq = None
-        # demand_curve = None
-        # supply_curve = None
 
-        # Will change this to pass in whole queue 
         while trader_q.empty() is False:
             [trades, lob,p_eq,q_eq,demand_curve,supply_curve] = trader_q.get(block=False)
 
-            # print(f'supply curve {supply_curve}')
-            # print(f'demand curve {demand_curve}')
-            # print(f'auction price {p_eq}')
-            # print(f'number of trades {len(trades)}')
-
-            
             for trade in trades: 
-                #Sending None order which should be ok
-                #If not then add orders_to_batch in item sent in queue 
                 if trade['party1'] == trader.tid:
                     trader.bookkeep(trade, None, bookkeep_verbose, virtual_time)
                 if trade['party2'] == trader.tid:
