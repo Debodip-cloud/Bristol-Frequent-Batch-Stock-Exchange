@@ -257,7 +257,7 @@ def run_exchange(
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)            
             if trades is not None:
-                print("\n")
+                #print("\n")
                 print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {round(p_eq,2)}')
                 # print(f'Supply Curve: {supply_curve}')
                 # print(f'Demand Curve: {demand_curve}')
