@@ -187,12 +187,15 @@ class TraderZic(Trader):
             otype = self.orders[coid].otype
             
             #changing minimum and maximum prices calculation
-            if demand_curve!=None and supply_curve!=None:
-                min_price = min(demand_curve, key=lambda x: x[0])[0]
-                max_price = max(supply_curve, key=lambda x: x[0])[0]
-            else:
-                min_price = min_price_lob
-                max_price = max_price_lob
+            # if demand_curve!=None and supply_curve!=None:
+            #     min_price = min(demand_curve, key=lambda x: x[0])[0]
+            #     max_price = max(supply_curve, key=lambda x: x[0])[0]
+            # else:
+            #     min_price = min_price_lob
+            #     max_price = max_price_lob
+
+            min_price = min_price_lob
+            max_price = max_price_lob
 
             if otype == 'Bid':
                 if min_price>limit:
@@ -366,9 +369,9 @@ class TraderZip(Trader):
             quote_price = int(self.limit * (1 + self.margin))
             self.price = quote_price
 
-            if self.job=='Bid':
-                print("\n")
-                print(f'limit price,quote price and auction price {self.orders[coid].price,quote_price,p_eq} at time {time}')
+            # if self.job=='Bid':
+            #     print("\n")
+            #     print(f'limit price,quote price and auction price {self.orders[coid].price,quote_price,p_eq} at time {time}')
         
             order = Order(self.tid, self.job, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
@@ -392,39 +395,6 @@ class TraderZip(Trader):
         else:
             trade = trades[0]
 
-        # if demand_curve!=None and supply_curve!=None: 
-            
-        #     if(p_eq==501): #there were no trades in the batch so can use
-        #         best_bid = max(demand_curve, key=lambda x: x[0])[0]
-        #         best_ask = min(supply_curve, key=lambda x: x[0])[0]
-
-        #     else:
-        #         remaining_bids = [price for price,_ in demand_curve if price<p_eq or p_eq==501]
-        #         remaining_asks = [price for price,_ in supply_curve if price>p_eq or p_eq==501]
-
-        #         # print("\n")
-        #         # print(f"demand curve: {demand_curve}")
-        #         # print(f"supply curve: {supply_curve}")
-        #         # print(f"remaining asks {remaining_asks}")
-        #         # print(f"remaining bids {remaining_bids}")
-        #         # print(f"auction price {p_eq}")
-        #         # print(f"number of trades {q_eq}")
-        #         # print("\n")
-
-        #         if remaining_bids!=[]:
-        #             best_bid = remaining_bids[0]
-        #         else:
-        #             best_bid = None
-        #         if remaining_asks!=[]:
-        #             best_ask = remaining_asks[0]
-        #         else:
-        #             best_ask = None
-
-        # else:
-        #     best_bid = None
-        #     best_ask = None
-
-        #ONLY RESPOND (ADJUST PARAMETERS) WHEN NEW BATCH HAS BEEN PROCESSED
         if self.last_batch==(demand_curve,supply_curve):
             return
         else:
@@ -649,6 +619,9 @@ class TraderAa(Trader):
         self.sell_target = None
         self.buy_r = -1.0 * (0.3 * random.random())
         self.sell_r = -1.0 * (0.3 * random.random())
+
+        #define last batch so that internal values are only updated upon new batch matching
+        self.last_batch = None
 
     def calc_eq(self):
         """
@@ -881,6 +854,18 @@ class TraderAa(Trader):
         :param trade: trade which occurred to trigger this response
         :param verbose: should verbose logging be printed to the console
         """
+
+
+        if len(trades)==0:
+            trade = None
+        else:
+            trade = trades[0]
+
+        if self.last_batch==(demand_curve,supply_curve):
+            return
+        else:
+            self.last_batch = (demand_curve,supply_curve)
+
         bid_hit = False
 
         lob_best_bid_p = lob['bids']['best']
@@ -992,6 +977,9 @@ class TraderGdx(Trader):
         self.holdings = 25
         self.remaining_offer_ops = 25
         self.values = [[0 for _ in range(self.remaining_offer_ops)] for _ in range(self.holdings)]
+
+        #define last batch so that internal values are only updated upon new batch matching
+        self.last_batch = None
 
     def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
@@ -1158,6 +1146,18 @@ class TraderGdx(Trader):
         :param trade: trade which occurred to trigger this response
         :param verbose: should verbose logging be printed to the console
         """
+        if len(trades)==0:
+                trade = None
+        else:
+            trade = trades[0]
+
+        if self.last_batch==(demand_curve,supply_curve):
+            return
+        else:
+            self.last_batch = (demand_curve,supply_curve)
+        
+
+
         # what, if anything, has happened on the bid LOB?
         self.outstanding_bids = lob['bids']['lob']
         # bid_improved = False
