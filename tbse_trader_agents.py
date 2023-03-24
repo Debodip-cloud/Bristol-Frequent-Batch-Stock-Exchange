@@ -390,12 +390,11 @@ class TraderZip(Trader):
         :param verbose: Should verbose logging be printed to console
         """
 
-        # if len(trades)==0:
-        #     trade = None
-        # else:
-        #     trade = trades[0]
+        if len(trades)==0:
+            trade = None
+        else:
+            trade = trades[0]
 
-        trade = trades[0]
 
         if self.last_batch==(demand_curve,supply_curve):
             return
@@ -515,7 +514,7 @@ class TraderZip(Trader):
             # the ask LOB is empty now but was not previously: canceled or lifted?
             last_tape_item = lob['tape'][-1]
             if last_tape_item['type'] == 'Cancel':
-                print("Last bid was cancelled") # test
+                #print("Last bid was cancelled") # test
                 ask_lifted = False
             else:
                 ask_lifted = True
@@ -524,6 +523,9 @@ class TraderZip(Trader):
             print('B_improved', bid_improved, 'B_hit', bid_hit, 'A_improved', ask_improved, 'A_lifted', ask_lifted)
 
         deal = bid_hit or ask_lifted
+
+        if trade is None:
+            deal = False
 
         if self.job == 'Ask':
             # seller

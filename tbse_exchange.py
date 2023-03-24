@@ -507,7 +507,9 @@ class Exchange(Orderbook):
             supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
 
             #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            return None,lob,None,0,supply_curve,demand_curve
+            #return None,lob,None,0,supply_curve,demand_curve
+            return [],lob,501,0,supply_curve,demand_curve
+
                     
         for order in orders: 
             if order.otype =='Bid':
@@ -534,7 +536,9 @@ class Exchange(Orderbook):
             supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
             lob = self.publish_lob(time, False)
 
-            return None,lob,None,0,supply_curve,demand_curve
+            #return None,lob,None,0,supply_curve,demand_curve
+            return [],lob,501,0,supply_curve,demand_curve
+
        
         if(len(asks)==0):
             for o in bids:
@@ -547,7 +551,9 @@ class Exchange(Orderbook):
             supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
 
             #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            return None,lob,None,0,supply_curve,demand_curve
+            #return None,lob,None,0,supply_curve,demand_curve
+            return [],lob,501,0,supply_curve,demand_curve
+
             
         
         demand_lob = [(b.price,b.qty) for b in bids]
