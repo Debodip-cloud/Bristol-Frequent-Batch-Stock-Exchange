@@ -17,8 +17,8 @@ numZIC = 5
 numZIP = 5
 numGDX = 0
 numAA = 0
-numGVWY = 5
-numSHVR = 5
+numGVWY = 0
+numSHVR = 0
 
 # Order Schedule
 useOffset = False  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True #causes multiple prints sometimes?

@@ -390,10 +390,12 @@ class TraderZip(Trader):
         :param verbose: Should verbose logging be printed to console
         """
 
-        if len(trades)==0:
-            trade = None
-        else:
-            trade = trades[0]
+        # if len(trades)==0:
+        #     trade = None
+        # else:
+        #     trade = trades[0]
+
+        trade = trades[0]
 
         if self.last_batch==(demand_curve,supply_curve):
             return

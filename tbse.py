@@ -260,7 +260,7 @@ def run_exchange(
             #print(f"The time of batch is {virtual_time}")            
             if trades is not None:
                 #print("\n")
-                print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {round(p_eq,2)}')
+                print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {p_eq}')
                 #print(f'There have been {len(trades)} trades in the batch at time {virtual_time}')
                 # print(f'Supply Curve: {supply_curve}')
                 # print(f'Demand Curve: {demand_curve}')
@@ -269,8 +269,17 @@ def run_exchange(
                     completed_coid[trade['coid']] = True #changed this
                     completed_coid[trade['counter']] = True
                     
-            for q in trader_qs:
-                q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
+                for q in trader_qs:
+                    q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
+            else:
+                  print("\n")
+                  print("Trades is none!!")
+                  print(f'There have been 0 trades in the batch at time {virtual_time} at price {p_eq}')
+                  print(f"demand curve: {demand_curve}")
+                  print(f"supply curve {supply_curve}")
+                  print(f"orders to batch {[(o.price,o.otype) for o in orders_to_batch]}")
+
+                
                         
             orders_to_batch = []
             last_batch_time = virtual_time
