@@ -928,6 +928,8 @@ class TraderAa(Trader):
         self.prev_best_ask_q = lob_best_ask_q
 
         deal = bid_hit or ask_lifted
+        if (trades==[]):
+            deal = False
 
         # End nicked from ZIP
 
