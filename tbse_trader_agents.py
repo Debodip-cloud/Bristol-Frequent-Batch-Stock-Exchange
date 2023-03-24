@@ -486,7 +486,7 @@ class TraderZip(Trader):
             last_tape_item = lob['tape'][-1] #might have to check if has been cancelled at some point during batch 
             #for item in lob['tape'] check if cancel happened with price of
             if last_tape_item['type'] == 'Cancel': 
-                print("Last bid was cancelled") #test
+                #print("Last bid was cancelled") #test
                 bid_hit = False
             else:
                 bid_hit = True
