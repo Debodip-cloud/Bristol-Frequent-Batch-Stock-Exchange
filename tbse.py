@@ -759,8 +759,14 @@ if __name__ == "__main__":
                       " schedule.")
                 continue
 
-            file_name = f"{str(NUM_ZIC).zfill(2)}-{str(NUM_ZIP).zfill(2)}-{str(NUM_GDX).zfill(2)}-" \
+            #putting results from CSV files instead results folder:
+            results_folder = "results"
+            if not os.path.exists(results_folder):
+                os.makedirs(results_folder)
+
+            file_name = f"{results_folder}/{str(NUM_ZIC).zfill(2)}-{str(NUM_ZIP).zfill(2)}-{str(NUM_GDX).zfill(2)}-" \
                         f"{str(NUM_AA).zfill(2)}-{str(NUM_GVWY).zfill(2)}-{str(NUM_SHVR).zfill(2)}.csv"
+            
             with open(file_name, 'w', encoding="utf-8") as tdump:
 
                 for _ in range(0, config.numSchedulesPerRatio):
