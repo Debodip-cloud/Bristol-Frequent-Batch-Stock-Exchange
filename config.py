@@ -13,16 +13,16 @@ end_time = 600.0
 # Trader Schedule
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
-numZIC = 5
+numZIC = 19
 numZIP = 0
-numGDX = 5
+numGDX = 0
 numAA = 0
-numGVWY = 5
-numSHVR = 5
+numGVWY = 0
+numSHVR = 0
 
 # Order Schedule
 useOffset = False  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True #causes multiple prints sometimes?
-useInputFile = True  # Use an input file to define order schedule (e.g. Real World Trading data) # True causes higher ZIP profit
+useInputFile = False  # Use an input file to define order schedule (e.g. Real World Trading data)
 input_file = "RWD/IBM-310817.csv" # Path to real world data input file
 stepmode = 'fixed'  # Valid values: 'fixed', 'jittered', 'random'
 timemode = 'periodic'  # Valid values: 'periodic', 'drip-fixed', 'drip-jitter', 'drip-poisson'

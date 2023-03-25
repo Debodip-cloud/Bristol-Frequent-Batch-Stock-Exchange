@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 10 #20 second batches seem reasonable
+    batch_period = 30 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -255,13 +255,12 @@ def run_exchange(
         if elapsed_time>=batch_period and required_batch_number !=0 :
             #required_batch_number-=1; #uncomment this for testing
             
-            trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)
-            #trades = lob = p_eq = q_eq = demand_curve = supply_curve = None #THIS LINE SHOWS EXCHANGE CODE IS SLOW
-            #print(f"The time of batch is {virtual_time}")            
-           
+            trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)   
                 
-            if trades!=[]:
-                print(f'There have been {len(trades)} trades in the batch at time {virtual_time} at price {round(p_eq,2)}')
+            # if trades!=[]:
+            #     print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
+            # # else:
+            #     print(f'There have been no trades at time {round(virtual_time,2)}')
             
             for trade in trades: 
                 completed_coid[trade['coid']] = True #changed this

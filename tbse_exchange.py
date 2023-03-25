@@ -346,139 +346,6 @@ class Exchange(Orderbook):
         return None, lob
 
    
-        """
-        receive a batch of orders and execute a frequent batch auction to match buyers and sellers
-        :param time: Current time
-        :param orders: List of orders being processed
-        :param verbose: Should verbose logging be printed to the console
-        :return: list of transaction records
-        """            
-
-        # print("LOB Before: ")
-        #lob = self.publish_lob(time, False)
-        # print (lob)
-        # print("\n")
-  
-        old_asks = self.asks.orders.values()
-        old_bids = self.bids.orders.values()
-        new_bids = []
-        new_asks = []
-
-        if len(orders)==0:
-            lob = self.publish_lob(time, False)
-            demand_lob = [(b.price,b.qty) for b in old_bids]
-            supply_lob = [(a.price,a.qty) for a in old_asks]
-
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-
-            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            return None,lob,None,0,supply_curve,demand_curve
-                    
-        for order in orders: 
-            if order.otype =='Bid':
-                new_bids.append(order)
-            elif order.otype =='Ask':
-                new_asks.append(order)
-            else:
-                print("Other type of order?")
-    
-        asks = new_asks+list(old_asks)
-        bids = new_bids+list(old_bids)
-        
-        bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
-        asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
-
-
-        if(len(bids)==0):
-            for o in asks:
-                self.add_order(order,verbose)
-
-            demand_lob = [(b.price,b.qty) for b in old_bids]
-            supply_lob = [(a.price,a.qty) for a in asks]
-
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-            lob = self.publish_lob(time, False)
-
-            return None,lob,None,0,supply_curve,demand_curve
-       
-        if(len(asks)==0):
-            for o in bids:
-                self.add_order(order,verbose)
-            lob = self.publish_lob(time, False)
-            
-            demand_lob = [(b.price,b.qty) for b in bids]
-            supply_lob = [(a.price,a.qty) for a in old_asks]
-
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-
-            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            return None,lob,None,0,supply_curve,demand_curve
-            
-        
-        demand_lob = [(b.price,b.qty) for b in bids]
-        supply_lob = [(a.price,a.qty) for a in asks]
-
-        supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-        auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
-        # print(f'all bids {[b.price for b in bids]}')
-        # print(f'all asks {[a.price for a in asks]}')
-
-        # print("\n")
-        # print(f'supply curve {supply_curve}')
-        # print(f'demand curve {demand_curve}')
-        # print(f'new auction price {auction_price}')
-
-        buyers = [b for b in bids if b.price >= auction_price]
-        sellers = [s for s in asks if s.price <= auction_price]      
-        trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-        transaction_records = [] # Initialize transaction records list     
-
-        while buyers and sellers and trade_qty > 0:
-            buyer = buyers[0]
-            seller = sellers[0]
-            trade_qty = min(trade_qty, min(buyer.qty, seller.qty)) 
-
-            transaction_record = {
-                'type': 'Trade',
-                't': time,
-                'price': auction_price,
-                'party1': seller.tid,
-                'party2': buyer.tid,
-                'qty': trade_qty,
-                'coid': buyer.coid,
-                'counter': seller.coid
-            }
-            
-            transaction_records.append(transaction_record)
-            self.tape.append(transaction_record)
-            if verbose:
-                print(f'>>>>>>>>>>>>>>>>>TRADE t={time:5.2f} ${auction_price} {seller.tid} {buyer.tid}')
-            
-            buyer.qty -= trade_qty
-            seller.qty -= trade_qty
-
-            if buyer.qty == 0: #add more print statements
-                bids.remove(buyer)
-                buyers.remove(buyer)
-                if buyer in old_bids: #checking here could give error as empty
-                    self.del_order(time,buyer)
-
-            if seller.qty == 0: #add more print statements
-                asks.remove(seller)
-                sellers.remove(seller)
-                if seller in old_asks: 
-                    self.del_order(time,seller)
-
-        # Add any remaining unmatched bids and asks to the order book
-        for o in bids + asks:
-            toid, response = self.add_order(o, verbose) #orders added with the same price are given as 1 quantity - big problem. 
-            o.toid = toid
-            if verbose:
-                print(f'TOID: order.toid={o.toid}')
-                print(f'RESPONSE: {response}')
-
-        lob = self.publish_lob(time, False)
-        return transaction_records,lob,auction_price,len(transaction_records),demand_curve,supply_curve
     
     def process_order_batch2(self, time, orders, verbose):
         """
@@ -488,12 +355,6 @@ class Exchange(Orderbook):
         :param verbose: Should verbose logging be printed to the console
         :return: list of transaction records
         """            
-
-        # print("LOB Before: ")
-        #lob = self.publish_lob(time, False)
-        # print (lob)
-        # print("\n")
-  
         old_asks = self.asks.orders.values()
         old_bids = self.bids.orders.values()
         new_bids = []
@@ -506,69 +367,29 @@ class Exchange(Orderbook):
 
             supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
 
-            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            #return None,lob,None,0,supply_curve,demand_curve
+            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve 
+            #501 is used as no p_eq 
             return [],lob,501,0,supply_curve,demand_curve
 
                     
         for order in orders: 
             if order.otype =='Bid':
                 new_bids.append(order)
-            elif order.otype =='Ask':
-                new_asks.append(order)
             else:
-                print("Other type of order?")
-    
+                new_asks.append(order)
+
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
         
         bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
         asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
 
-
-        if(len(bids)==0):
-            for o in asks:
-                self.add_order(order,verbose)
-
-            demand_lob = [(b.price,b.qty) for b in old_bids]
-            supply_lob = [(a.price,a.qty) for a in asks]
-
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-            lob = self.publish_lob(time, False)
-
-            #return None,lob,None,0,supply_curve,demand_curve
-            return [],lob,501,0,supply_curve,demand_curve
-
-       
-        if(len(asks)==0):
-            for o in bids:
-                self.add_order(order,verbose)
-            lob = self.publish_lob(time, False)
-            
-            demand_lob = [(b.price,b.qty) for b in bids]
-            supply_lob = [(a.price,a.qty) for a in old_asks]
-
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-
-            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve
-            #return None,lob,None,0,supply_curve,demand_curve
-            return [],lob,501,0,supply_curve,demand_curve
-
-            
-        
         demand_lob = [(b.price,b.qty) for b in bids]
         supply_lob = [(a.price,a.qty) for a in asks]
 
         supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
         auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
-        # print(f'all bids {[b.price for b in bids]}')
-        # print(f'all asks {[a.price for a in asks]}')
-
-        # print("\n")
-        # print(f'supply curve {supply_curve}')
-        # print(f'demand curve {demand_curve}')
-        # print(f'new auction price {auction_price}')
-
+    
         buyers = [b for b in bids if b.price >= auction_price]
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
@@ -598,13 +419,13 @@ class Exchange(Orderbook):
             buyer.qty -= trade_qty
             seller.qty -= trade_qty
 
-            if buyer.qty == 0: #add more print statements
+            if buyer.qty == 0: 
                 bids.remove(buyer)
                 buyers.remove(buyer)
-                if buyer in old_bids: #checking here could give error as empty
+                if buyer in old_bids: 
                     self.del_order(time,buyer)
 
-            if seller.qty == 0: #add more print statements
+            if seller.qty == 0: 
                 asks.remove(seller)
                 sellers.remove(seller)
                 if seller in old_asks: 
@@ -612,7 +433,7 @@ class Exchange(Orderbook):
 
         # Add any remaining unmatched bids and asks to the order book
         for o in bids + asks:
-            toid, response = self.add_order(o, verbose) #orders added with the same price are given as 1 quantity - big problem. 
+            toid, response = self.add_order(o, verbose)
             o.toid = toid
             if verbose:
                 print(f'TOID: order.toid={o.toid}')
@@ -638,11 +459,6 @@ class Exchange(Orderbook):
     
 
     def find_equilibrium_price_old(self,supply_curve, demand_curve):
-        # Sort demand and supply curves by price
-        # demand_curve.sort()
-        # supply_curve.sort()
-
-        # Initialize variables
         demand_quantity = 0
         supply_quantity = 0
         equilibrium_price = 501
