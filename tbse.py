@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 30 #20 second batches seem reasonable
+    batch_period = 10 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 
@@ -760,7 +760,8 @@ if __name__ == "__main__":
                 continue
 
             #putting results from CSV files instead results folder:
-            results_folder = "results"
+            #change results_folder = results_<combination number>
+            results_folder = "results_4_10"
             if not os.path.exists(results_folder):
                 os.makedirs(results_folder)
 

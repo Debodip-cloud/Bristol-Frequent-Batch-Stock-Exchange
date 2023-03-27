@@ -2,3 +2,6 @@ __pycache__/
 /transactions.csv
 .vscode/
 .idea/
+results*/
+possible_combinations/
+
