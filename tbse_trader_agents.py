@@ -240,7 +240,11 @@ class TraderShaver(Trader):
             #     best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
             #     best_ask = min(supply_curve, key=lambda x: x[0])[0]-1
 
-            if lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+            
+            if p_eq!=None and p_eq!=501:
+                best_bid = p_eq+1
+                best_ask = p_eq-1
+            elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
                 best_bid = lob['bids']['best'] + 1
                 best_ask = lob['asks']['best'] -1 
                 # print("In best bids and asks LOB not demand curves")

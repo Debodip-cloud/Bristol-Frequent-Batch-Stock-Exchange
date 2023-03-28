@@ -354,7 +354,8 @@ class Exchange(Orderbook):
         :param orders: List of orders being processed
         :param verbose: Should verbose logging be printed to the console
         :return: list of transaction records
-        """            
+        """
+        
         old_asks = self.asks.orders.values()
         old_bids = self.bids.orders.values()
         new_bids = []
@@ -369,9 +370,8 @@ class Exchange(Orderbook):
 
             #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve 
             #501 is used as no p_eq 
-            return [],lob,501,0,supply_curve,demand_curve
+            return [],lob,None,0,supply_curve,demand_curve
 
-                    
         for order in orders: 
             if order.otype =='Bid':
                 new_bids.append(order)
@@ -389,11 +389,10 @@ class Exchange(Orderbook):
 
         supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
         auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
-    
         buyers = [b for b in bids if b.price >= auction_price]
         sellers = [s for s in asks if s.price <= auction_price]      
         trade_qty = min(sum([b.qty for b in buyers]), sum([s.qty for s in sellers]))
-        transaction_records = [] # Initialize transaction records list     
+        transaction_records = [] # Initialize transaction records list
 
         while buyers and sellers and trade_qty > 0:
             buyer = buyers[0]
@@ -456,45 +455,12 @@ class Exchange(Orderbook):
             dumpfile.close()
             if tape_mode == 'wipe':
                 self.tape = []
-    
 
-    def find_equilibrium_price_old(self,supply_curve, demand_curve):
-        demand_quantity = 0
-        supply_quantity = 0
-        equilibrium_price = 501
-
-        if len(supply_curve)<=1 or len(demand_curve)<=1:
-            return equilibrium_price
-
-        # Iterate through demand and supply curves
-        for i in range(len(demand_curve)):
-            price, demand = demand_curve[i]
-            supply = supply_curve[i][1]
-
-            #demand_quantity += demand
-            #supply_quantity += supply
-
-            demand_quantity = demand
-            supply_quantity += supply
-
-            # If demand equals supply, we've found the equilibrium price
-            if demand_quantity == supply_quantity:
-                equilibrium_price = price
-                break
-            # If supply exceeds demand, keep iterating until we find the point where they intersect
-            elif supply_quantity > demand_quantity:
-                excess_supply = supply_quantity - demand_quantity
-                previous_price, previous_demand = demand_curve[i - 1]
-                previous_supply = supply_curve[i - 1][1]
-                # Use linear interpolation to estimate the equilibrium price
-                equilibrium_price = previous_price + (excess_supply / previous_demand) * (price - previous_price)
-                break
-
-        return equilibrium_price
     
     def find_equilibrium_price(self,supply, demand):
         # Initialize variables to store the best price and the smallest net surplus
-        best_price = 501
+
+        best_price = -1
         smallest_net_surplus = 1000
 
         # Loop over the prices in the demand curve and find the best price
@@ -505,6 +471,7 @@ class Exchange(Orderbook):
             if suppliers == []:
                 break
             else:
+                #get best ask price at given price in bids 
                 supply_price,supply_qty = suppliers[0]     
         
             

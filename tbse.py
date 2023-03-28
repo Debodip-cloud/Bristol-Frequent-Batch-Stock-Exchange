@@ -228,7 +228,20 @@ def run_exchange(
         while kill_q.empty() is False:
             exchange.del_order(virtual_time, kill_q.get())
     
-        order = order_q.get()
+        # if(virtual_time>590):
+        #     print(f"time is {virtual_time} and queue is about to get order")
+        #     print(f"size of queue is {order_q.qsize()}")
+
+        order = order_q.get()    
+        
+        try:
+            order = order_q.get(timeout=1)  # wait for 1 second for an order to be available
+        except queue.Empty:
+            continue  # continue with the outer loop if no order is available after 1 second
+
+        # if(virtual_time>590):
+        #     print(f"time is {virtual_time} and queue has got order {order}")
+        
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
                 #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times which is unnecessary here.  
@@ -257,9 +270,9 @@ def run_exchange(
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)   
                 
-            # if trades!=[]:
-            #     print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
-            # # else:
+            if trades!=[]:
+                print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
+            # else:
             #     print(f'There have been no trades at time {round(virtual_time,2)}')
             
             for trade in trades: 
@@ -314,6 +327,7 @@ def run_trader(
 
     while start_event.isSet():
         time.sleep(0.01)
+        #print("in sleep 1")
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
         time_left = (virtual_end - virtual_time) / virtual_end
 
@@ -456,24 +470,35 @@ def market_session(
                     if verbose:
                         print(f'Killing order {str(traders[kill].last_quote)}')
         time.sleep(0.01)
+        #print("in sleep 2")
 
     start_event.clear()
     len_threads = len(threading.enumerate())
 
+    print("gets to point 1")
+
     # close exchange thread
-    ex_thread.join()
+    ex_thread.join() #MAKE IT SO THAT THIS THREAD CLOSES WHEN START EVENT IS CLEARED
+
+    print("gets to point 2")
 
     # close trader threads
     for thread in trader_threads:
         thread.join()
 
+    print("gets to point 3")
+
+
     # end of an experiment -- dump the tape
     exchange.tape_dump('transactions.csv', 'a', 'keep')
+
+    print("gets to point 4")
 
     # write trade_stats for this experiment NB end-of-session summary only
     if len_threads == len(traders) + 2:
         trade_stats(sess_id, traders, tdump)
 
+    print("gets to point 5")
     return len_threads
 
 
@@ -699,6 +724,7 @@ if __name__ == "__main__":
                         trial = trial - 1
                         start_session_event.clear()
                         time.sleep(0.5)
+                        print("in sleep 3")
                         print("\n")
                         print("Hitting this whenever Shaver agents are used")
                         print("\n")
@@ -708,7 +734,7 @@ if __name__ == "__main__":
                     trial = trial - 1
                     start_session_event.clear()
                     time.sleep(0.5)
-                    print("In sleep 2")
+                    print("In sleep 4")
                 tdump.flush()
                 trial = trial + 1
 
@@ -761,7 +787,7 @@ if __name__ == "__main__":
 
             #putting results from CSV files instead results folder:
             #change results_folder = results_<combination number>
-            results_folder = "results_4_10"
+            results_folder = "test_results"
             if not os.path.exists(results_folder):
                 os.makedirs(results_folder)
 
@@ -807,14 +833,14 @@ if __name__ == "__main__":
                                 trial_number = trial_number - 1
                                 start_session_event.clear()
                                 time.sleep(0.5)
-                                print("In sleep 3")
+                                print("In sleep 5")
                         except Exception as e:  # pylint: disable=broad-except
                             print("Market session failed. Trying again. " + str(e))
                             trial = trial - 1
                             trial_number = trial_number - 1
                             start_session_event.clear()
                             time.sleep(0.5)
-                            print("In sleep 4")
+                            print("In sleep 6")
                         tdump.flush()
                         trial = trial + 1
                         trial_number = trial_number + 1

@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load csv file as pandas dataframe
-df = pd.read_csv("trader_profit_table_sum_30.csv")
+df = pd.read_csv("test_table_summed.csv")
 
 # Get list of unique traders
 traders = df["Trader"].unique()
@@ -25,4 +25,4 @@ ax.set_ylabel("Profit")
 ax.legend()
 
 # Show the plot
-plt.savefig("output_30.png")
+plt.savefig("output_test.png")

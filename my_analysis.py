@@ -4,7 +4,7 @@ import csv
 import pandas as pd
 
 if __name__ == "__main__":
-    result_folders = ["results"]
+    result_folders = ["test_results"]
     table = pd.DataFrame(columns=["Trader", "Profit", "Market Share"])
 
     for folder_path in result_folders:
@@ -41,7 +41,11 @@ if __name__ == "__main__":
                         table = table.append({"Trader": trader_name, "Profit": profit, "Market Share": market_share}, ignore_index=True)
 
         # Group the table by trader name and market share and sum the profits
-        table = table.groupby(["Trader", "Market Share"]).agg({"Profit": "sum"}).reset_index()
+        #table = table.groupby(["Trader", "Market Share"]).agg({"Profit": "sum"}).reset_index() #CHANGING SUM TO MEAN
+        table.to_csv("test_table_not_summed.csv", index=False)
+
+        table = table.groupby(["Trader", "Market Share"]).agg({"Profit": "mean"}).reset_index()
+
 
         # Save the table to a CSV file
-        table.to_csv("trader_profit_table_sum.csv", index=False)
+        table.to_csv("test_table_summed.csv", index=False)
