@@ -459,12 +459,11 @@ class Exchange(Orderbook):
     
     def find_equilibrium_price(self,supply, demand):
         # Initialize variables to store the best price and the smallest net surplus
-
-        best_price = -1
+        best_prices = [-1]
         smallest_net_surplus = 1000
 
         # Loop over the prices in the demand curve and find the best price
-        for price, demand_qty in demand:
+        for price, demand_qty in demand: #could step through all prices and make p* halfway point between valid prices
             # Find the quantity of the good supplied at the current price
             suppliers = [(x[0],x[1]) for x in supply if price>=x[0]]
             
@@ -481,46 +480,20 @@ class Exchange(Orderbook):
             
             net_surplus = abs(consumer_surplus - producer_surplus)
 
-            if net_surplus<=smallest_net_surplus:
+            if net_surplus<smallest_net_surplus:
                 #best_price = supply_price
-                best_price = (supply_price + price) / 2.0
+                best_prices=[supply_price]
+                smallest_net_surplus = net_surplus
+            elif net_surplus==smallest_net_surplus:
+                best_prices.append(supply_price)
                 smallest_net_surplus = net_surplus
 
-        # Return the best price
+        if len(best_prices)==1:
+            best_price = best_prices[0]
+        else:
+            best_price= sum(best_prices) / len(best_prices)
+        
         return best_price
-
-
-    def find_equilibrium_price_old(self,supply_curve, demand_curve):
-            demand_quantity = 0
-            supply_quantity = 0
-            equilibrium_price = 501
-
-            if len(supply_curve)<=1 or len(demand_curve)<=1:
-                return equilibrium_price
-
-            # Iterate through demand and supply curves
-            for i in range(len(demand_curve)):
-                price, demand = demand_curve[i]
-                supply = supply_curve[i][1]
-
-                #demand_quantity += demand
-                #supply_quantity += supply
-
-                demand_quantity = demand
-                supply_quantity = supply
-
-                # If demand equals supply, we've found the equilibrium price
-                if demand_quantity == supply_quantity:
-                    equilibrium_price = price
-                    break
-                # If supply exceeds demand, keep iterating until we find the point where they intersect
-                elif supply_quantity > demand_quantity:
-                    excess_supply = supply_quantity - demand_quantity
-                    previous_price, previous_demand = demand_curve[i - 1]
-                    previous_supply = supply_curve[i - 1][1]
-                    # Use linear interpolation to estimate the equilibrium price
-                    equilibrium_price = previous_price + (excess_supply / previous_demand) * (price - previous_price)
-                    break
 
     def create_supply_demand_curves(self, supply_lob, demand_lob):
         supply_curve = {}

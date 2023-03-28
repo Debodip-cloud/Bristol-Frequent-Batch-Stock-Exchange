@@ -229,7 +229,7 @@ def run_exchange(
             order = kill_q.get()
             exchange.del_order(virtual_time,order )
     
-        order = order_q.get()    
+        #order = order_q.get()    
         
         try:
             order = order_q.get(timeout=1)  # wait for 1 second for an order to be available
@@ -238,8 +238,8 @@ def run_exchange(
 
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                pass
-        
+                #print("order has already been completed")
+                pass #changed from pass
         else:
             completed_coid[order.coid] = False
             
@@ -256,18 +256,13 @@ def run_exchange(
             
             orders_to_batch.append(order) #adding order to batched orders
 
-        #time seems to go from 8.5 to [42,end]        
         elapsed_time = virtual_time - last_batch_time
         if elapsed_time>=batch_period and required_batch_number !=0 :
             #required_batch_number-=1; #uncomment this for testing
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)   
-                
-            # print(f"demand {demand_curve}")
-            # print(f"supply {supply_curve}")
+            
             if trades!=[]:
-                print(f"demand {demand_curve}")
-                print(f"supply {supply_curve}")
                 print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
             # else:
             #     if p_eq==None:
@@ -276,7 +271,7 @@ def run_exchange(
             #         print(f'There have been no trades at time {round(virtual_time,2)} because no equilibrium could be found')
             
             for trade in trades: 
-                completed_coid[trade['coid']] = True #changed this
+                completed_coid[trade['coid']] = True 
                 completed_coid[trade['counter']] = True
                             
             for q in trader_qs:
@@ -474,30 +469,21 @@ def market_session(
     start_event.clear()
     len_threads = len(threading.enumerate())
 
-    print("gets to point 1")
-
     # close exchange thread
     ex_thread.join() #MAKE IT SO THAT THIS THREAD CLOSES WHEN START EVENT IS CLEARED
-
-    print("gets to point 2")
 
     # close trader threads
     for thread in trader_threads:
         thread.join()
 
-    print("gets to point 3")
-
 
     # end of an experiment -- dump the tape
     exchange.tape_dump('transactions.csv', 'a', 'keep')
-
-    print("gets to point 4")
 
     # write trade_stats for this experiment NB end-of-session summary only
     if len_threads == len(traders) + 2:
         trade_stats(sess_id, traders, tdump)
 
-    print("gets to point 5")
     return len_threads
 
 

@@ -15,9 +15,9 @@ end_time = 600.0
 # Same values will be used to define other side of exchange (buyers = sellers).
 numZIC = 0
 numZIP = 5
-numGDX = 0
+numGDX = 5
 numAA = 0
-numGVWY = 1
+numGVWY = 5
 numSHVR = 0
 
 # Order Schedule
@@ -26,7 +26,7 @@ useInputFile = False  # Use an input file to define order schedule (e.g. Real Wo
 input_file = "RWD/IBM-310817.csv" # Path to real world data input file
 stepmode = 'fixed'  # Valid values: 'fixed', 'jittered', 'random'
 timemode = 'periodic'  # Valid values: 'periodic', 'drip-fixed', 'drip-jitter', 'drip-poisson'
-interval = 30  # Virtual seconds between new set of customer orders being generated.
+interval = 30  # Virtual seconds between new set of customer orders being generated. #changed to 250 from 30
 
 # Market supply schedule
 supply = {

@@ -158,7 +158,7 @@ class TraderGiveaway(Trader):
                           quote_price,
                           self.orders[coid].qty,
                           time, self.orders[coid].coid, self.orders[coid].toid)
-            self.last_quote = order
+            self.last_quote = order       
         return order
 
 
