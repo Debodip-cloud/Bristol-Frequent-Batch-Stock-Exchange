@@ -355,7 +355,7 @@ class Exchange(Orderbook):
         :param verbose: Should verbose logging be printed to the console
         :return: list of transaction records
         """
-        
+
         old_asks = self.asks.orders.values()
         old_bids = self.bids.orders.values()
         new_bids = []
@@ -482,11 +482,45 @@ class Exchange(Orderbook):
             net_surplus = abs(consumer_surplus - producer_surplus)
 
             if net_surplus<=smallest_net_surplus:
-                best_price = supply_price
+                #best_price = supply_price
+                best_price = (supply_price + price) / 2.0
                 smallest_net_surplus = net_surplus
 
         # Return the best price
         return best_price
+
+
+    def find_equilibrium_price_old(self,supply_curve, demand_curve):
+            demand_quantity = 0
+            supply_quantity = 0
+            equilibrium_price = 501
+
+            if len(supply_curve)<=1 or len(demand_curve)<=1:
+                return equilibrium_price
+
+            # Iterate through demand and supply curves
+            for i in range(len(demand_curve)):
+                price, demand = demand_curve[i]
+                supply = supply_curve[i][1]
+
+                #demand_quantity += demand
+                #supply_quantity += supply
+
+                demand_quantity = demand
+                supply_quantity = supply
+
+                # If demand equals supply, we've found the equilibrium price
+                if demand_quantity == supply_quantity:
+                    equilibrium_price = price
+                    break
+                # If supply exceeds demand, keep iterating until we find the point where they intersect
+                elif supply_quantity > demand_quantity:
+                    excess_supply = supply_quantity - demand_quantity
+                    previous_price, previous_demand = demand_curve[i - 1]
+                    previous_supply = supply_curve[i - 1][1]
+                    # Use linear interpolation to estimate the equilibrium price
+                    equilibrium_price = previous_price + (excess_supply / previous_demand) * (price - previous_price)
+                    break
 
     def create_supply_demand_curves(self, supply_lob, demand_lob):
         supply_curve = {}

@@ -226,12 +226,9 @@ def run_exchange(
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
         while kill_q.empty() is False:
-            exchange.del_order(virtual_time, kill_q.get())
+            order = kill_q.get()
+            exchange.del_order(virtual_time,order )
     
-        # if(virtual_time>590):
-        #     print(f"time is {virtual_time} and queue is about to get order")
-        #     print(f"size of queue is {order_q.qsize()}")
-
         order = order_q.get()    
         
         try:
@@ -239,12 +236,8 @@ def run_exchange(
         except queue.Empty:
             continue  # continue with the outer loop if no order is available after 1 second
 
-        # if(virtual_time>590):
-        #     print(f"time is {virtual_time} and queue has got order {order}")
-        
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                #continue #continue may result in batches being skipped. Idea is not to process certain orders multiple times which is unnecessary here.  
                 pass
         
         else:
@@ -270,16 +263,22 @@ def run_exchange(
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)   
                 
+            # print(f"demand {demand_curve}")
+            # print(f"supply {supply_curve}")
             if trades!=[]:
+                print(f"demand {demand_curve}")
+                print(f"supply {supply_curve}")
                 print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
             # else:
-            #     print(f'There have been no trades at time {round(virtual_time,2)}')
+            #     if p_eq==None:
+            #         print(f'There have been no trades at time {round(virtual_time,2)} because no new trades have come in')
+            #     else:
+            #         print(f'There have been no trades at time {round(virtual_time,2)} because no equilibrium could be found')
             
             for trade in trades: 
                 completed_coid[trade['coid']] = True #changed this
                 completed_coid[trade['counter']] = True
-                
-            
+                            
             for q in trader_qs:
                     q.put([trades,lob,p_eq,q_eq,demand_curve,supply_curve]) 
       
