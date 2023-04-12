@@ -148,6 +148,7 @@ class TraderGiveaway(Trader):
         :param lob: Limit order book
         :return: Order to be sent to the exchange
         """
+
         if len(self.orders) < 1:
             order = None
         else:
@@ -158,7 +159,9 @@ class TraderGiveaway(Trader):
                           quote_price,
                           self.orders[coid].qty,
                           time, self.orders[coid].coid, self.orders[coid].toid)
-            self.last_quote = order       
+            self.last_quote = order
+            print(f"Trader {self.tid} of {self.orders[coid].otype} has orders with limit prices {[o[1].price for o in self.orders.items()]} at time {time} \n")
+       
         return order
 
 
