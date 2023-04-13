@@ -4,7 +4,7 @@
 # General
 sessionLength = 1  # Length of session in seconds.
 virtualSessionLength = 600  # Number of virtual timesteps per sessionLength.
-verbose = True  # Adds additional output for debugging. #changed this to True
+verbose = False  # Adds additional output for debugging. #changed this to True
 
 # BSE ONLY
 start_time = 0.0
@@ -14,9 +14,9 @@ end_time = 600.0
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
 numZIC = 0
-numZIP = 1
-numGDX = 5
-numAA = 0
+numZIP = 0
+numGDX = 10
+numAA = 10
 numGVWY = 0
 numSHVR = 0
 

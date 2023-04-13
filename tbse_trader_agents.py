@@ -933,9 +933,11 @@ class TraderAa(Trader):
             # if trade is not None:
             self.previous_transactions.append(trade['price'])
             if self.sell_target is None:
-                self.sell_target = trade['price']
+                self.sell_target = trade['price'] #CHANGED THIS
+                #self.sell_target = best_ask
             if self.buy_target is None:
-                self.buy_target = trade['price']
+                self.buy_target = trade['price'] #CHANGED THIS
+                #self.sell_target = best_bid
             self.calc_eq()
             self.calc_alpha()
             self.calc_theta()
