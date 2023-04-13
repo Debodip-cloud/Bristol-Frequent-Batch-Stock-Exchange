@@ -316,9 +316,9 @@ def run_trader(
     #Not 
     trades = []
     p_eq = -1
-    q_eq = None
-    demand_curve = None
-    supply_curve = None
+    q_eq = 0
+    demand_curve = []
+    supply_curve = []
 
     while start_event.isSet():
         time.sleep(0.01)
