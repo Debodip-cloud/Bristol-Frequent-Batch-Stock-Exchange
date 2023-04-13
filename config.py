@@ -15,8 +15,8 @@ end_time = 600.0
 # Same values will be used to define other side of exchange (buyers = sellers).
 numZIC = 0
 numZIP = 5
-numGDX = 5
-numAA = 0
+numGDX = 0
+numAA = 5
 numGVWY = 0
 numSHVR = 0
 

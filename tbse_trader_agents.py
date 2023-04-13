@@ -850,19 +850,24 @@ class TraderAa(Trader):
         :param verbose: should verbose logging be printed to the console
         """
 
-
-        if len(trades)==0:
-            trade = None
-        else:
-            trade = trades[0]
-
         if self.last_batch==(demand_curve,supply_curve):
             return
         else:
             self.last_batch = (demand_curve,supply_curve)
+     
+        trade = trades[0] if trades else None
+    
+        best_bid = lob['bids']['best']
+        best_ask = lob['asks']['best']
+
+        if demand_curve!=[]:
+            best_bid = max(demand_curve, key=lambda x: x[0])[0]
+        if supply_curve!=[]:
+            best_ask = min(supply_curve, key=lambda x: x[0])[0]
 
         bid_hit = False
-        lob_best_bid_p = lob['bids']['best']
+        #lob_best_bid_p = lob['bids']['best'] #CHANGED
+        lob_best_bid_p = best_bid
         lob_best_bid_q = None
         if lob_best_bid_p is not None:
             # non-empty bid LOB
@@ -889,7 +894,8 @@ class TraderAa(Trader):
         # ask_improved = False
         ask_lifted = False
 
-        lob_best_ask_p = lob['asks']['best']
+        #lob_best_ask_p = lob['asks']['best'] #CHANGED THIS
+        lob_best_ask_p = best_ask
         lob_best_ask_q = None
         if lob_best_ask_p is not None:
             # non-empty ask LOB
@@ -1157,8 +1163,6 @@ class TraderGdx(Trader):
         if supply_curve!=[]:
             best_ask = min(supply_curve, key=lambda x: x[0])[0]
         
-
-
         # what, if anything, has happened on the bid LOB?
         self.outstanding_bids = lob['bids']['lob']
         # bid_improved = False
