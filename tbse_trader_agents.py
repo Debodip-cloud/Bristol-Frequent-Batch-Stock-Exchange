@@ -1152,6 +1152,8 @@ class TraderGdx(Trader):
             return
         else:
             self.last_batch = (demand_curve,supply_curve)
+            # print(f"demand_curve {demand_curve}")
+            # print(f"supply curve {supply_curve}")
      
         trade = trades[0] if trades else None
     
@@ -1183,7 +1185,10 @@ class TraderGdx(Trader):
             elif trade is not None and ((self.prev_best_bid_p > lob_best_bid_p) or (
                     (self.prev_best_bid_p == lob_best_bid_p) and (self.prev_best_bid_q > lob_best_bid_q))):
                 # previous best bid was hit
-                self.accepted_bids.append(self.prev_best_bid_p)
+
+                #self.accepted_bids.append(self.prev_best_bid_p) #CHANGED HERE
+                self.accepted_bids.extend([p for p,q in demand_curve[:q_eq]])
+                #print(f"adding {[p for p,q in demand_curve[:q_eq]]}")
                 # bid_hit = True
         # elif self.prev_best_bid_p is not None:
         #     # the bid LOB has been emptied: was it cancelled or hit?
@@ -1213,7 +1218,10 @@ class TraderGdx(Trader):
                     (self.prev_best_ask_p == lob_best_ask_p) and (self.prev_best_ask_q > lob_best_ask_q))):
                 # trade happened and best ask price has got worse, or stayed same but quantity reduced
                 # assume previous best ask was lifted
-                self.accepted_asks.append(self.prev_best_ask_p)
+                #self.accepted_asks.append(self.prev_best_ask_p) #CHANGED THIS
+                self.accepted_asks.extend([p for p,q in supply_curve[-q_eq:]])
+                #print(f"adding {[p for p,q in supply_curve[-q_eq:]]}")
+
                 # ask_lifted = True
         # elif self.prev_best_ask_p is not None:
         # the ask LOB is empty now but was not previously: canceled or lifted?
