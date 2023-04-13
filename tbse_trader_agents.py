@@ -376,30 +376,21 @@ class TraderZip(Trader):
         :param trade: Trade being responded to
         :param verbose: Should verbose logging be printed to console
         """
-        if len(trades)==0:
-            trade = None
-        else:
-            trade = trades[0]
-    
+        
         if self.last_batch==(demand_curve,supply_curve):
             return
         else:
             self.last_batch = (demand_curve,supply_curve)
      
-        
-        
-        # best_bid = lob['bids']['best'] 
-        # best_ask = lob['asks']['best'] 
-        
+        trade = trades[0] if trades else None
+    
+        best_bid = lob['bids']['best']
+        best_ask = lob['asks']['best']
+
         if demand_curve!=[]:
             best_bid = max(demand_curve, key=lambda x: x[0])[0]
-        else:
-            best_bid = lob['bids']['best'] 
-
         if supply_curve!=[]:
             best_ask = min(supply_curve, key=lambda x: x[0])[0]
-        else:
-            best_ask = lob['asks']['best']     
 
         def target_up(price):
             """
@@ -1151,15 +1142,20 @@ class TraderGdx(Trader):
         :param trade: trade which occurred to trigger this response
         :param verbose: should verbose logging be printed to the console
         """
-        if len(trades)==0:
-                trade = None
-        else:
-            trade = trades[0]
-
         if self.last_batch==(demand_curve,supply_curve):
             return
         else:
             self.last_batch = (demand_curve,supply_curve)
+     
+        trade = trades[0] if trades else None
+    
+        best_bid = lob['bids']['best']
+        best_ask = lob['asks']['best']
+
+        if demand_curve!=[]:
+            best_bid = max(demand_curve, key=lambda x: x[0])[0]
+        if supply_curve!=[]:
+            best_ask = min(supply_curve, key=lambda x: x[0])[0]
         
 
 
@@ -1167,7 +1163,8 @@ class TraderGdx(Trader):
         self.outstanding_bids = lob['bids']['lob']
         # bid_improved = False
         # bid_hit = False
-        lob_best_bid_p = lob['bids']['best']
+        # lob_best_bid_p = lob['bids']['best']
+        lob_best_bid_p = best_bid
         lob_best_bid_q = None
         if lob_best_bid_p is not None:
             # non-empty bid LOB
@@ -1196,7 +1193,8 @@ class TraderGdx(Trader):
         self.outstanding_asks = lob['asks']['lob']
         # ask_improved = False
         # ask_lifted = False
-        lob_best_ask_p = lob['asks']['best']
+        #lob_best_ask_p = lob['asks']['best']
+        lob_best_ask_p = best_ask
         lob_best_ask_q = None
 
         if lob_best_ask_p is not None:
