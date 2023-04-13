@@ -13,20 +13,20 @@ end_time = 600.0
 # Trader Schedule
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
-numZIC = 0
+numZIC = 5
 numZIP = 0
 numGDX = 0
-numAA = 0
-numGVWY = 3
+numAA = 5
+numGVWY = 0
 numSHVR = 0
 
 # Order Schedule
 useOffset = False  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True #causes multiple prints sometimes?
 useInputFile = False  # Use an input file to define order schedule (e.g. Real World Trading data)
 input_file = "RWD/IBM-310817.csv" # Path to real world data input file
-stepmode = 'fixed'  # Valid values: 'fixed', 'jittered', 'random'
+stepmode = 'random'  # Valid values: 'fixed', 'jittered', 'random'
 timemode = 'periodic'  # Valid values: 'periodic', 'drip-fixed', 'drip-jitter', 'drip-poisson'
-interval = 200  # Virtual seconds between new set of customer orders being generated. #changed to 250 from 30
+interval = 30  # Virtual seconds between new set of customer orders being generated. #changed to 250 from 30
 
 # Market supply schedule
 supply = {
@@ -51,11 +51,11 @@ demand = {
 }
 
 # For single schedule: using config trader schedule, or command-line trader schedule.
-numTrials = 1
+numTrials = 10
 
 # For multiple schedules: using input csv file. 
-numSchedulesPerRatio = 1  # Number of schedules per ratio of traders in csv file.
-numTrialsPerSchedule = 10  # Number of trails per schedule.
+numSchedulesPerRatio = 10  # Number of schedules per ratio of traders in csv file.
+numTrialsPerSchedule = 1  # Number of trails per schedule.
 symmetric = True  # Should range of supply = range of demand?
 
 

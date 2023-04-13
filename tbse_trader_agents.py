@@ -160,7 +160,7 @@ class TraderGiveaway(Trader):
                           self.orders[coid].qty,
                           time, self.orders[coid].coid, self.orders[coid].toid)
             self.last_quote = order
-            print(f"Trader {self.tid} of {self.orders[coid].otype} has orders with limit prices {[o[1].price for o in self.orders.items()]} at time {time} \n")
+            #print(f"Trader {self.tid} of {self.orders[coid].otype} has orders with limit prices {[o[1].price for o in self.orders.items()]} at time {time} \n")
        
         return order
 
@@ -188,14 +188,6 @@ class TraderZic(Trader):
             max_price_lob = lob['asks']['worst']
             limit = self.orders[coid].price
             otype = self.orders[coid].otype
-            
-            #changing minimum and maximum prices calculation
-            # if demand_curve!=None and supply_curve!=None:
-            #     min_price = min(demand_curve, key=lambda x: x[0])[0]
-            #     max_price = max(supply_curve, key=lambda x: x[0])[0]
-            # else:
-            #     min_price = min_price_lob
-            #     max_price = max_price_lob
 
             min_price = min_price_lob
             max_price = max_price_lob
@@ -236,18 +228,11 @@ class TraderShaver(Trader):
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
 
-            # best_bid = 500
-            # best_ask = 500
+            if p_eq!=-1:
+                best_bid = p_eq
+                best_ask = p_eq
 
-            # if demand_curve!=None and supply_curve!=None:
-            #     best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
-            #     best_ask = min(supply_curve, key=lambda x: x[0])[0]-1
-
-            
-            # if p_eq!=None and p_eq!=501:
-            #     best_bid = p_eq+1
-            #     best_ask = p_eq-1
-            if lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+            elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
                 best_bid = lob['bids']['best'] + 1
                 best_ask = lob['asks']['best'] -1 
                 # print("In best bids and asks LOB not demand curves")
@@ -353,7 +338,6 @@ class TraderZip(Trader):
 
     def get_order(self,time,p_eq ,q_eq, demand_curve,supply_curve,countdown,lob):
         """
-
         :param time: Current time
         :param countdown: Time until end of current market session
         :param lob: Limit order book
@@ -376,10 +360,6 @@ class TraderZip(Trader):
             quote_price = int(self.limit * (1 + self.margin))
             self.price = quote_price
 
-            # if self.job=='Bid':
-            #     print("\n")
-            #     print(f'limit price,quote price and auction price {self.orders[coid].price,quote_price,p_eq} at time {time}')
-        
             order = Order(self.tid, self.job, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
@@ -878,7 +858,6 @@ class TraderAa(Trader):
             self.last_batch = (demand_curve,supply_curve)
 
         bid_hit = False
-
         lob_best_bid_p = lob['bids']['best']
         lob_best_bid_q = None
         if lob_best_bid_p is not None:

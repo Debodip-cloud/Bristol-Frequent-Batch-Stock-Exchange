@@ -353,7 +353,7 @@ class Exchange(Orderbook):
         :param time: Current time
         :param orders: List of orders being processed
         :param verbose: Should verbose logging be printed to the console
-        :return: list of transaction records
+        :return: list of transaction records, state of limit order book, equilibrium price, equilibrium quantity, demand curve, supply curve
         """
 
         old_asks = self.asks.orders.values()
@@ -366,11 +366,9 @@ class Exchange(Orderbook):
             demand_lob = [(b.price,b.qty) for b in old_bids]
             supply_lob = [(a.price,a.qty) for a in old_asks]
 
-            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
-
-            #return transaction_records,lob,auction_price,len(transaction_record),demand_curve,supply_curve 
-            #501 is used as no p_eq 
-            return [],lob,None,0,supply_curve,demand_curve
+            supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)
+    
+            return [],lob,-1,0,demand_curve,supply_curve
 
         for order in orders: 
             if order.otype =='Bid':
@@ -380,13 +378,13 @@ class Exchange(Orderbook):
 
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
-        
-        bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
-        asks.sort(key=lambda o: (o.price,int(o not in old_asks)))
+    
+        bids.sort(key=lambda o: (-o.price,int(o in old_bids)))
+        asks.sort(key=lambda o: (o.price,int(o in old_asks)))
 
         demand_lob = [(b.price,b.qty) for b in bids]
         supply_lob = [(a.price,a.qty) for a in asks]
-
+    
         supply_curve,demand_curve = self.create_supply_demand_curves(supply_lob,demand_lob)    
         auction_price = self.find_equilibrium_price(supply_curve,demand_curve)
         buyers = [b for b in bids if b.price >= auction_price]
@@ -439,6 +437,7 @@ class Exchange(Orderbook):
                 print(f'RESPONSE: {response}')
 
         lob = self.publish_lob(time, False)
+
         return transaction_records,lob,auction_price,len(transaction_records),demand_curve,supply_curve
 
     def tape_dump(self, file_name, file_mode, tape_mode):
@@ -458,42 +457,53 @@ class Exchange(Orderbook):
 
     
     def find_equilibrium_price(self,supply, demand):
-        # Initialize variables to store the best price and the smallest net surplus
-        best_prices = [-1]
+        # Initialize variables to store the best prices and the smallest net surplus
+        best_supply_prices = [-1]
+        best_demand_prices = [-1]
         smallest_net_surplus = 1000
 
-        # Loop over the prices in the demand curve and find the best price
-        for price, demand_qty in demand: #could step through all prices and make p* halfway point between valid prices
+        # Loop over the prices in the demand curve and find the best prices
+        for demand_price, demand_qty in demand:
             # Find the quantity of the good supplied at the current price
-            suppliers = [(x[0],x[1]) for x in supply if price>=x[0]]
-            
-            if suppliers == []:
+            suppliers = [(supply_price, supply_qty) for supply_price, supply_qty in supply if supply_price <= demand_price]
+
+            if not suppliers:
                 break
-            else:
-                #get best ask price at given price in bids 
-                supply_price,supply_qty = suppliers[0]     
-        
-            
+
+            # Get the best ask price at the given demand price in the bids
+            supply_price, supply_qty = max(suppliers, key=lambda x: x[0])
+
             # Calculate the consumer surplus and producer surplus at the current price
             consumer_surplus = demand_qty
             producer_surplus = supply_qty
-            
+
             net_surplus = abs(consumer_surplus - producer_surplus)
 
-            if net_surplus<smallest_net_surplus:
-                #best_price = supply_price
-                best_prices=[supply_price]
+            if net_surplus < smallest_net_surplus:
+                best_supply_prices = [supply_price]
+                best_demand_prices = [demand_price]
                 smallest_net_surplus = net_surplus
-            elif net_surplus==smallest_net_surplus:
-                best_prices.append(supply_price)
-                smallest_net_surplus = net_surplus
+            elif net_surplus == smallest_net_surplus:
+                best_supply_prices.append(supply_price)
+                best_demand_prices.append(demand_price)
 
-        if len(best_prices)==1:
-            best_price = best_prices[0]
+        if len(best_supply_prices) == 1:
+            best_supply_price = best_supply_prices[0]
         else:
-            best_price= sum(best_prices) / len(best_prices)
-        
-        return best_price
+            best_supply_price = sum(best_supply_prices) / len(best_supply_prices)
+
+        if len(best_demand_prices) == 1:
+            best_demand_price = best_demand_prices[0]
+        else:
+            best_demand_price = sum(best_demand_prices) / len(best_demand_prices)
+
+        # Calculate the equilibrium price as the midpoint of the best supply and demand prices
+        equilibrium_price = (best_supply_price + best_demand_price) / 2
+
+        # print(f"Supply: {supply}")
+        # print(f"Demand {demand}")
+        # print(f"equilibrium price {equilibrium_price}\n")
+        return equilibrium_price
 
     def create_supply_demand_curves(self, supply_lob, demand_lob):
         supply_curve = {}
