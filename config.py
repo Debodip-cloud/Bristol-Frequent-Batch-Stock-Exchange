@@ -14,10 +14,10 @@ end_time = 600.0
 # Define number of each algorithm used one side of exchange (buyers or sellers).
 # Same values will be used to define other side of exchange (buyers = sellers).
 numZIC = 0
-numZIP = 0
-numGDX = 10
-numAA = 10
-numGVWY = 0
+numZIP = 10
+numGDX = 0
+numAA = 0
+numGVWY = 10
 numSHVR = 0
 
 # Order Schedule
@@ -54,8 +54,8 @@ demand = {
 numTrials = 10
 
 # For multiple schedules: using input csv file. 
-numSchedulesPerRatio = 1  # Number of schedules per ratio of traders in csv file.
-numTrialsPerSchedule = 1  # Number of trails per schedule.
+numSchedulesPerRatio = 10  # Number of schedules per ratio of traders in csv file.
+numTrialsPerSchedule = 100  # Number of trails per schedule.
 symmetric = True  # Should range of supply = range of demand?
 
 

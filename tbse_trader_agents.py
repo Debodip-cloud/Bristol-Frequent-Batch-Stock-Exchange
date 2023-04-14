@@ -1142,6 +1142,28 @@ class TraderGdx(Trader):
             return 0
         return (accepted_bids_lower + asks_lower) / (accepted_bids_lower + asks_lower + unaccepted_bids_greater)
 
+    def get_best_n_bids(self,demand_curve, n):
+        bids = []
+        last_item_count = 0
+        for price, quantity in demand_curve:
+            num_bids = quantity-last_item_count
+            last_item_count = quantity
+            bids += [price] * num_bids
+            if len(bids) >= n:
+                return bids[:n]
+        return bids
+
+    def get_best_n_asks(self,supply_curve, n):
+        asks = []
+        last_item_count = 0
+        for price, quantity in reversed(supply_curve):
+            num_asks = quantity-last_item_count
+            last_item_count = quantity
+            asks += [price] * num_asks
+            if len(asks) >= n:
+                return asks[:n]
+        return asks
+    
     def respond(self,time,p_eq ,q_eq, demand_curve,supply_curve,lob,trades,verbose):
         """
         Updates GDX trader's internal variables based on activities on the LOB
@@ -1189,7 +1211,8 @@ class TraderGdx(Trader):
                 # previous best bid was hit
 
                 #self.accepted_bids.append(self.prev_best_bid_p) #CHANGED HERE
-                self.accepted_bids.extend([p for p,q in demand_curve[:q_eq]])
+                self.accepted_bids.extend(self.get_best_n_bids(demand_curve,q_eq))
+                #self.accepted_bids.extend([p for p,q in demand_curve[:q_eq]])
                 #print(f"adding {[p for p,q in demand_curve[:q_eq]]}")
                 # bid_hit = True
         # elif self.prev_best_bid_p is not None:
@@ -1221,7 +1244,8 @@ class TraderGdx(Trader):
                 # trade happened and best ask price has got worse, or stayed same but quantity reduced
                 # assume previous best ask was lifted
                 #self.accepted_asks.append(self.prev_best_ask_p) #CHANGED THIS
-                self.accepted_asks.extend([p for p,q in supply_curve[-q_eq:]])
+                self.accepted_asks.extend(self.get_best_n_asks(supply_curve,q_eq))
+                #self.accepted_asks.extend([p for p,q in supply_curve[-q_eq:]])
                 #print(f"adding {[p for p,q in supply_curve[-q_eq:]]}")
 
                 # ask_lifted = True
