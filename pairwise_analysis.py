@@ -88,7 +88,24 @@ def process_csv_folder(folder_path):
 
     return sorted_all_wins, total_wins
 
+### OLD ###
+# folder_path = "results/GDXvsZIP"
+# all_wins, total_wins = process_csv_folder(folder_path)
+# print(total_wins)
 
-folder_path = "results/GDXvsZIP"
-all_wins, total_wins = process_csv_folder(folder_path)
-print(total_wins)
+
+### NEW ###
+data = []
+
+path = "results" # the path to the directory containing the folders
+for folder_name in os.listdir(path):
+    if os.path.isdir(os.path.join(path, folder_name)):
+        all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))
+        # extract the two trader names from the folder name
+        trader_names = folder_name.split("vs")
+        trader1 = trader_names[0]
+        trader2 = trader_names[1]
+        # add the total_wins to the data structure
+        data.append((trader1, trader2, total_wins[0], total_wins[1]))
+
+print(data)
