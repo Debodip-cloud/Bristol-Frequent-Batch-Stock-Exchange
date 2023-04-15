@@ -79,12 +79,13 @@ def process_csv_folder(folder_path):
     plt.ylabel("Wins Difference")
     #plt.title(comparison+" Delta Curve")
     plt.xlim(1, 19)  
-    plt.ylim(-1000, 1000)  # might not need this
+    #plt.ylim(-1100, 1100)  # might not need this
 
     plt.grid(axis='y', linestyle='-', alpha=0.7)  
     plt.box(False) 
     plt.savefig("plots/"+comparison+".pdf")
     plt.show()
+    plt.clf()
 
     return sorted_all_wins, total_wins
 
