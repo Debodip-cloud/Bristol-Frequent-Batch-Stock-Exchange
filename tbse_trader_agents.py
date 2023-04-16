@@ -230,10 +230,11 @@ class TraderShaver(Trader):
 
             best_bid = 500
             best_ask = 0
-            if demand_curve!=None:
+            
+            if demand_curve!=[]:
                 best_bid = max(demand_curve, key=lambda x: x[0])[0]+1
 
-            if supply_curve!=None:
+            if supply_curve!=[]:
                 best_ask = min(supply_curve, key=lambda x: x[0])[0]-1    
 
             if otype == 'Bid':
