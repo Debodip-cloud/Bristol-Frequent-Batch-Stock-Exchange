@@ -2,6 +2,7 @@ import os
 import csv
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def get_trader_names(file_name, trader_names):
@@ -40,9 +41,9 @@ def process_csv_file(file_name,master_trader):
     trader1_count = int(first_row[3])
     trader2_count = int(first_row[10])
     if trader1_name==master_trader:
-        return [trader1_count,trader1_wins, trader2_wins]
+        return [trader1_count/2,trader1_wins, trader2_wins]
     else:
-        return [trader2_count,trader2_wins, trader1_wins]
+        return [trader2_count/2,trader2_wins, trader1_wins]
     
 
 
@@ -65,20 +66,47 @@ def process_csv_folder(folder_path):
 
 
     comparison = re.search(r'results\/(.+)', folder_path).group(1)
-    # Calculate the difference in wins for each trader
     win_diffs = {k: v[0] - v[1] for k, v in sorted_all_wins.items()}
 
-    # Plot the trader number (key) against the win difference (value)
-    plt.bar(win_diffs.keys(), win_diffs.values())
-    plt.xlabel("Trader")
+    for n,ratio in all_wins.items():
+        if sum(ratio)!=1000:
+            print(f"Error with trader number{n} and ratio {ratio} \n ")
+    
+    #plt.plot(win_diffs.keys(), win_diffs.values())
+    x = np.arange(1, 20)
+    plt.plot(x, list(win_diffs.values()))
+    plt.xlabel("Number of "+master_trader+" traders")
     plt.ylabel("Wins Difference")
-    plt.title("Trader Wins Difference")
-    plt.savefig(comparison.pdf)
+    #plt.title(comparison+" Delta Curve")
+    plt.xlim(1, 19)  
+    #plt.ylim(-1100, 1100)  # might not need this
+
+    plt.grid(axis='y', linestyle='-', alpha=0.7)  
+    plt.box(False) 
+    plt.savefig("plots/"+comparison+".pdf")
     plt.show()
+    plt.clf()
 
     return sorted_all_wins, total_wins
 
+### OLD ###
+# folder_path = "results/GDXvsZIP"
+# all_wins, total_wins = process_csv_folder(folder_path)
+# print(total_wins)
 
-folder_path = "results/GDXvsZIC"
-all_wins, total_wins = process_csv_folder(folder_path)
-print(all_wins)
+
+### NEW ###
+data = []
+
+path = "results" # the path to the directory containing the folders
+for folder_name in os.listdir(path):
+    if os.path.isdir(os.path.join(path, folder_name)):
+        all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))
+        # extract the two trader names from the folder name
+        trader_names = folder_name.split("vs")
+        trader1 = trader_names[0]
+        trader2 = trader_names[1]
+        # add the total_wins to the data structure
+        data.append((trader1, trader2, total_wins[0], total_wins[1]))
+
+print(data)

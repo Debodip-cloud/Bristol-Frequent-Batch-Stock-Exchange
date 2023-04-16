@@ -228,11 +228,11 @@ class TraderShaver(Trader):
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
 
-            if p_eq!=-1:
-                best_bid = p_eq
-                best_ask = p_eq
+            # if p_eq!=-1:
+            #     best_bid = p_eq
+            #     best_ask = p_eq
 
-            elif lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
+            if lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
                 best_bid = lob['bids']['best'] + 1
                 best_ask = lob['asks']['best'] -1 
                 # print("In best bids and asks LOB not demand curves")
