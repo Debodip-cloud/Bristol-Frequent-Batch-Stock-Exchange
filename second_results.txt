@@ -1,4 +1,4 @@
-results for SHVR implementation that doesn't target equlibrium
+results for SHVR implementation that doesn't target equlibrium and instead looks at best bid
 
 Total number of wins for each trading algorithm:
 {'GVWY': 94537, 'ZIP': 66684, 'GDX': 60162, 'AA': 37440, 'ZIC': 22797, 'SHVR': 3380}

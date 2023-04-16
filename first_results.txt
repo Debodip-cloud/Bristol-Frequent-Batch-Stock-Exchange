@@ -1,3 +1,5 @@
+results for SHVR implementation that targets equlibrium
+
 Total number of wins for each trading algorithm:
 {'GVWY': 94498, 'ZIP': 66718, 'GDX': 60156, 'AA': 37440, 'ZIC': 22422, 'SHVR': 3766}
 
