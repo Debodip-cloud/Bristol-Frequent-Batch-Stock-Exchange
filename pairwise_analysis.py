@@ -108,5 +108,6 @@ for folder_name in os.listdir(path):
         trader2 = trader_names[1]
         # add the total_wins to the data structure
         data.append((trader1, trader2, total_wins[0], total_wins[1]))
+    
 
 print(data)
