@@ -223,36 +223,26 @@ class TraderShaver(Trader):
         if len(self.orders) < 1:
             order = None
         else:
-
             coid = max(self.orders.keys())
             limit_price = self.orders[coid].price
             otype = self.orders[coid].otype
-
-            # if p_eq!=-1:
-            #     best_bid = p_eq
-            #     best_ask = p_eq
-
-            if lob['bids']['n'] > 0 and lob['asks']['n'] > 0 :
-                best_bid = lob['bids']['best'] + 1
-                best_ask = lob['asks']['best'] -1 
-                # print("In best bids and asks LOB not demand curves")
-            else:
-                best_bid = lob['bids']['worst'] 
-                best_ask = lob['asks']['worst']
-
             if otype == 'Bid':
-                quote_price= best_bid
-                quote_price = min(quote_price, limit_price)
+                if lob['bids']['n'] > 0:
+                    quote_price = lob['bids']['best'] + 1
+                    quote_price = min(quote_price, limit_price)
+                else:
+                    quote_price = lob['bids']['worst']
             else:
-                quote_price = best_ask
-                quote_price = max(quote_price, limit_price)
-
-            #quote_price = min(quote_price, limit_price)
+                if lob['asks']['n'] > 0:
+                    quote_price = lob['asks']['best'] - 1
+                    quote_price = max(quote_price, limit_price)
+                else:
+                    quote_price = lob['asks']['worst']
             order = Order(self.tid, otype, quote_price, self.orders[coid].qty, time, self.orders[coid].coid,
                           self.orders[coid].toid)
             self.last_quote = order
-
         return order
+
 
 
 class TraderSniper(Trader):
