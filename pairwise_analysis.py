@@ -65,7 +65,7 @@ def process_csv_folder(folder_path):
     sorted_all_wins = dict(sorted(all_wins.items()))
 
 
-    comparison = re.search(r'results\/(.+)', folder_path).group(1)
+    comparison = re.search(r'results_2\/(.+)', folder_path).group(1)
     win_diffs = {k: v[0] - v[1] for k, v in sorted_all_wins.items()}
 
     for n,ratio in all_wins.items():
@@ -83,7 +83,7 @@ def process_csv_folder(folder_path):
 
     plt.grid(axis='y', linestyle='-', alpha=0.7)  
     plt.box(False) 
-    plt.savefig("plots/"+comparison+".pdf")
+    plt.savefig("plots_2/"+comparison+".pdf")
     plt.show()
     plt.clf()
 
@@ -98,7 +98,7 @@ def process_csv_folder(folder_path):
 ### NEW ###
 data = []
 
-path = "results" # the path to the directory containing the folders
+path = "results_2" # the path to the directory containing the folders
 for folder_name in os.listdir(path):
     if os.path.isdir(os.path.join(path, folder_name)):
         all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))

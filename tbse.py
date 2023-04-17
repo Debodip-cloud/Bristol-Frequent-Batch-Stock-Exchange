@@ -347,9 +347,6 @@ def run_trader(
         time2 = time.time()
         order = trader.get_order(virtual_time,p_eq,q_eq,demand_curve,supply_curve, time_left, lob)
         
-        # if trader.ttype == 'SHVR' and virtual_time>500 and virtual_time<505:
-        #     print(f'Trader has ID {trader.tid} and has just generated an order with price {order.price} and type {order.otype}')
-        
         time3 = time.time()
         trader.times[1] += time2 - time1
         trader.times[3] += 1
