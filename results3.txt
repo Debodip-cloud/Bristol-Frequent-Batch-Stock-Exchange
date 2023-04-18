@@ -1,7 +1,0 @@
-prelim results missing AA vs GVWY
-
-Total number of wins for each trading algorithm:
-{'GVWY': 72868, 'ZIP': 63676, 'SHVR': 52080, 'GDX': 38439, 'AA': 30753, 'ZIC': 8184}
-
-Number of algorithms beaten by each trading algorithm:
-{'GVWY': 4, 'ZIP': 4, 'SHVR': 3, 'GDX': 2, 'AA': 1, 'ZIC': 0}
