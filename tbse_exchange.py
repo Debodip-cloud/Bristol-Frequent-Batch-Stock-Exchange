@@ -379,7 +379,7 @@ class Exchange(Orderbook):
         asks = new_asks+list(old_asks)
         bids = new_bids+list(old_bids)
     
-        bids.sort(key=lambda o: (-o.price,int(o in old_bids)))
+        bids.sort(key=lambda o: (-o.price,int(o not in old_bids)))
         asks.sort(key=lambda o: (o.price,int(o in old_asks)))
 
         demand_lob = [(b.price,b.qty) for b in bids]

@@ -23,6 +23,7 @@ def process_csv_file(file_name,master_trader):
     trader1_count = 0
     with open(file_name, newline="") as f:
         reader = csv.reader(f)
+        print(file_name)
         for row in reader:
             trader1_profit = float(row[4])
             trader2_profit = float(row[11])
@@ -65,12 +66,12 @@ def process_csv_folder(folder_path):
     sorted_all_wins = dict(sorted(all_wins.items()))
 
 
-    comparison = re.search(r'results_2\/(.+)', folder_path).group(1)
+    comparison = re.search(r'results_3\/(.+)', folder_path).group(1)
     win_diffs = {k: v[0] - v[1] for k, v in sorted_all_wins.items()}
 
     for n,ratio in all_wins.items():
         if sum(ratio)!=1000:
-            print(f"Error with trader number{n} and ratio {ratio} \n ")
+            print(f"Error with trader number{n} and ratio {ratio} \n. Comes from comparison {comparison} ")
     
     #plt.plot(win_diffs.keys(), win_diffs.values())
     x = np.arange(1, 20)
@@ -83,7 +84,7 @@ def process_csv_folder(folder_path):
 
     plt.grid(axis='y', linestyle='-', alpha=0.7)  
     plt.box(False) 
-    plt.savefig("plots_2/"+comparison+".pdf")
+    plt.savefig("plots_3/"+comparison+".pdf")
     plt.show()
     plt.clf()
 
@@ -98,7 +99,7 @@ def process_csv_folder(folder_path):
 ### NEW ###
 data = []
 
-path = "results_2" # the path to the directory containing the folders
+path = "results_3" # the path to the directory containing the folders
 for folder_name in os.listdir(path):
     if os.path.isdir(os.path.join(path, folder_name)):
         all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))
