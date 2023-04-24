@@ -3,3 +3,4 @@ Total number of wins for each trading algorithm:
 
 Number of algorithms beaten by each trading algorithm:
 {'GVWY': 5, 'ZIP': 4, 'SHVR': 3, 'GDX': 2, 'AA': 1, 'ZIC': 0}
+

@@ -165,6 +165,9 @@ y_demand = np.repeat(price_demanded, 2)[:-1]
 x_supply = np.repeat(quantities, 2)[1:]
 y_supply = np.repeat(price_supplied, 2)[:-1]
 
+
+### EQUILIBRIUM STUFF ###
+
 EQ = find_equilibrium_price_new(supply,demand)
 print("EQ IS %d",EQ)
 plt.axhline(y = EQ, color = 'g', linestyle = '--')
@@ -172,6 +175,8 @@ plt.axhline(y = EQ, color = 'g', linestyle = '--')
 old_EQ = find_equilibrium_price(supply,demand)
 print("old_EQ IS %d",old_EQ)
 plt.axhline(y = old_EQ, color = 'r', linestyle = '--')
+
+### EQUILIBRIUM STUFF ###
 
 plt.step(x_demand, y_demand, label='Demand')
 plt.step(x_supply, y_supply, label='Supply')
