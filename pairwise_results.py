@@ -1,6 +1,5 @@
-data = [('AA', 'GVWY', 170, 18830), ('AA', 'SHVR', 7451, 11549), ('GDX', 'AA', 11775, 7225), ('GDX', 'GVWY', 419, 18581), ('GDX', 'SHVR', 6691, 12309), ('GDX', 'ZIC', 17033, 1967), ('GDX', 'ZIP', 2521, 16479), ('GVWY', 'SHVR', 17230, 1770), ('ZIC', 'AA', 4858, 
-14142), ('ZIC', 'GVWY', 0, 19000), ('ZIC', 'SHVR', 1097, 17903), ('ZIP', 'AA', 17065, 1935), ('ZIP', 'GVWY', 943, 18057), ('ZIP', 'SHVR', 10451, 8549), ('ZIP', 'ZIC', 18738, 262)]
-# Create a dictionary to store the total number of wins for each trading algorithm
+data = [('AA', 'GVWY', 268, 18732), ('AA', 'SHVR', 9169, 9831), ('GDX', 'AA', 12099, 6901), ('GDX', 'GVWY', 149, 18851), ('GDX', 'SHVR', 6628, 12372), ('GDX', 'ZIC', 14905, 4095), ('GDX', 'ZIP', 1127, 17873), ('GVWY', 'SHVR', 18081, 919), ('ZIC', 'AA', 5615, 13385), ('ZIC', 'GVWY', 0, 19000), ('ZIC', 'SHVR', 1435, 17565), ('ZIP', 'AA', 17512, 1488), ('ZIP', 'GVWY', 838, 18162), ('ZIP', 'SHVR', 12334, 6666), ('ZIP', 'ZIC', 18846, 154)]
+
 wins = {'AA': 0, 'GVWY': 0, 'SHVR': 0, 'GDX': 0, 'ZIC': 0, 'ZIP': 0}
 # Create a dictionary to store the number of algorithms beaten by each trading algorithm
 beats = {'AA': 0, 'GVWY': 0, 'SHVR': 0, 'GDX': 0, 'ZIC': 0, 'ZIP': 0}

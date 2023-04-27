@@ -49,3 +49,11 @@ Total number of wins for each trading algorithm:
 Number of algorithms beaten by each trading algorithm:
 {'GVWY': 5, 'ZIP': 4, 'SHVR': 3, 'GDX': 2, 'AA': 1, 'ZIC': 0}
 
+With 2 second intervals and varying EQ: 
+
+Total number of wins for each trading algorithm:
+{'GVWY': 92826, 'ZIP': 67403, 'SHVR': 47353, 'GDX': 34908, 'AA': 31211, 'ZIC': 11299}
+
+Number of algorithms beaten by each trading algorithm:
+{'GVWY': 5, 'ZIP': 4, 'SHVR': 3, 'GDX': 2, 'AA': 1, 'ZIC': 0}
+
