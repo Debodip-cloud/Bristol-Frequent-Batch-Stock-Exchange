@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 2 #20 second batches seem reasonable
+    batch_period = 0.5 #20 second batches seem reasonable
     required_batch_number = 1
     last_batch_time = 0
 

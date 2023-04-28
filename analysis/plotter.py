@@ -42,9 +42,10 @@ ax.spines['right'].set_visible(False)
 plt.xlabel('Quantity')
 plt.ylabel('Price')
 ##plt.title('Supply and Demand Curves')
+plt.legend()
 plt.show()
+
 plt.savefig("EQ.jpg")
 
-plt.legend()
 
 plt.show()
