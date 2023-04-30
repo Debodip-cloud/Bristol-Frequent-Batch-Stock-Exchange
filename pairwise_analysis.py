@@ -66,7 +66,7 @@ def process_csv_folder(folder_path):
     sorted_all_wins = dict(sorted(all_wins.items()))
 
 
-    comparison = re.search(r'results_4\/(.+)', folder_path).group(1)
+    comparison = re.search(r'results_6\/(.+)', folder_path).group(1)
     win_diffs = {k: v[0] - v[1] for k, v in sorted_all_wins.items()}
 
     for n,ratio in all_wins.items():
@@ -76,15 +76,16 @@ def process_csv_folder(folder_path):
     #plt.plot(win_diffs.keys(), win_diffs.values())
     x = np.arange(1, 20)
     plt.plot(x, list(win_diffs.values()))
+    plt.plot([1, 19], [0, 0], 'k--', lw=1)  # Add this line to draw a solid line at y=0
     plt.xlabel("Number of "+master_trader+" traders")
     plt.ylabel("Wins Difference")
     #plt.title(comparison+" Delta Curve")
     plt.xlim(1, 19)  
     #plt.ylim(-1100, 1100)  # might not need this
-
+    plt.ylim(-1000, 1000)
     plt.grid(axis='y', linestyle='-', alpha=0.7)  
     plt.box(False) 
-    plt.savefig("plots_4/"+comparison+".pdf")
+    plt.savefig("plots_6/"+comparison+".pdf")
     plt.show()
     plt.clf()
 
@@ -99,7 +100,7 @@ def process_csv_folder(folder_path):
 ### NEW ###
 data = []
 
-path = "results_4" # the path to the directory containing the folders
+path = "results_6" # the path to the directory containing the folders
 for folder_name in os.listdir(path):
     if os.path.isdir(os.path.join(path, folder_name)):
         all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))
