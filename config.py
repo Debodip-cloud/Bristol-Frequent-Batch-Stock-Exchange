@@ -1,6 +1,10 @@
 """TBSE Config File"""
 # pylint: skip-file
 
+# BFBSE 
+
+batch_interval = 10 #interval between batches in number of seconds. 
+
 # General
 sessionLength = 1  # Length of session in seconds.
 virtualSessionLength = 600  # Number of virtual timesteps per sessionLength.
@@ -21,7 +25,7 @@ numGVWY = 5
 numSHVR = 0
 
 # Order Schedule
-useOffset = True  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True #causes multiple prints sometimes?
+useOffset = False  # Use an offset function to vary equilibrium price, this is disabled if useInputFile = True #causes multiple prints sometimes?
 useInputFile = False  # Use an input file to define order schedule (e.g. Real World Trading data)
 input_file = "RWD/IBM-310817.csv" # Path to real world data input file
 stepmode = 'random'  # Valid values: 'fixed', 'jittered', 'random'

@@ -23,7 +23,6 @@ if __name__ == "__main__":
                     trader_profit = [0] * len(trader_names)
                     trader_trades = [0] * len(trader_names)
 
-                    # Iterate over the rows of the CSV file to extract the total profit of each trader and create a table with market share
                     num_simulations = 0 
                     for row in csv_reader:
                         num_simulations+=1
@@ -32,7 +31,6 @@ if __name__ == "__main__":
                             trader_profit[i] += float(row[1+i*7+3])
                             trader_trades[i] += float(row[1+i*7+4])
 
-                    # Add the total profit and market share for each trader to the table
                     for i, trader_name in enumerate(trader_names):
                         profit = trader_profit[i]/num_simulations
                         trader_index = all_traders.index(trader_name)
@@ -40,12 +38,11 @@ if __name__ == "__main__":
                         market_share = 100*num_traders[trader_index] / sum([i for i in num_traders])
                         table = table.append({"Trader": trader_name, "Profit": profit, "Market Share": market_share}, ignore_index=True)
 
-        # Group the table by trader name and market share and sum the profits
+        
         #table = table.groupby(["Trader", "Market Share"]).agg({"Profit": "sum"}).reset_index() #CHANGING SUM TO MEAN
         table.to_csv("test_table_not_summed.csv", index=False)
 
         table = table.groupby(["Trader", "Market Share"]).agg({"Profit": "mean"}).reset_index()
 
 
-        # Save the table to a CSV file
         table.to_csv("test_table_summed.csv", index=False)

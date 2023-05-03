@@ -217,7 +217,7 @@ def run_exchange(
     start_event.wait()
     
     orders_to_batch = [] 
-    batch_period = 0.5 #20 second batches seem reasonable
+    batch_period = config.batch_interval
     required_batch_number = 1
     last_batch_time = 0
 
@@ -229,7 +229,6 @@ def run_exchange(
             order = kill_q.get()
             exchange.del_order(virtual_time,order )
     
-        #order = order_q.get()    
         
         try:
             order = order_q.get(timeout=1)  # wait for 1 second for an order to be available
@@ -238,8 +237,7 @@ def run_exchange(
 
         if order.coid in completed_coid:
             if completed_coid[order.coid]:
-                #print("order has already been completed")
-                pass #changed from pass
+                pass 
         else:
             completed_coid[order.coid] = False
             
@@ -261,7 +259,6 @@ def run_exchange(
             #required_batch_number-=1; #uncomment this for testing
             
             trades, lob,p_eq,q_eq,demand_curve,supply_curve = exchange.process_order_batch2(virtual_time, orders_to_batch, process_verbose)   
-            #print(f"There have been {demand_curve[-1][1]+supply_curve[0][1]} orders to consider in this batch \n")
 
             # if trades!=[]:
             #     print(f'There have been {len(trades)} trades in the batch at time {round(virtual_time,2)} at price {round(p_eq,2)}')
