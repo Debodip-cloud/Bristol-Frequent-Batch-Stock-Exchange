@@ -4,15 +4,14 @@
 [![](https://img.shields.io/github/issues/MichaelRol/Threaded-Bristol-Stock-Exchange)](https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+BFBSE is an extension of Dave Cliff's (University of Bristol) [Bristol Stock Exchange (BSE)](https://github.com/davecliff/BristolStockExchange "Bristol Stock Exchange") limit order-book financial exchange simulator and Rollins' [Threaded Bristol Stock Exchange (TBSE)] (https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange). BFBSE and aims to act as a minimal simulation of a limit-order-book financial exchange which uses FBAs. By using a first of its kind simulator of a FBA, I  evaluated the effectiveness of various trading algorithms under the constraints of discrete time intervals and batch processing, which they have not
+previously been tested with. 
 
-TBSE is an extension of Dave Cliff's (University of Bristol) [Bristol Stock Exchange (BSE)](https://github.com/davecliff/BristolStockExchange "Bristol Stock Exchange") limit order-book financial exchange simulator. Originally created for my MEng dissertation it has since been used in [Rollins & Cliff (2020)](https://arxiv.org/abs/2009.06905) and [Cliff & Rollins (2020)](https://arxiv.org/abs/2011.14346).
+This simulator was produced for my MEng Individual Project.
 
-TBSE simulates a CDA market where different automated trading algorithms can be compared under a variety of market conditions. The key difference between TBSE and BSE is that TBSE makes use of Python's multi-threading library which allows traders to operate asynchronously of each other and of the exchange, which is a more realistic model of real-world financial exchanges. This allows the execution time of the trading algorithms to have an impact on their performance. 
-
-Also included in this repository is a copy of BSE which has been updated to Python3. A guide to BSE, much of which also applies to TBSE, can be found [here.](https://github.com/davecliff/BristolStockExchange/blob/master/BSEguide1.2e.pdf "BSE Guide")
 ## Usage
 
-TBSE can be run in three different ways. These are the three different ways to enter the trader schedule. The trader schedule is the number of each type of trader present in the market session. It should be noted that in TBSE the buyer schedule is always equal to the seller schedule, i.e. there are the same number of buyers of each type as there are sellers. So if your schedule is 5 GDX and 5 AA, that means you will have 5 GDX buyers, 5 AA buyers, 5 GDX sellers and 5 AA sellers for a total of 20 traders. There are 6 traders available in TBSE, these are ZIC, ZIP, Giveaway, Shaver, AA, and GDX. The three ways to specify this schedule are:
+BFBSE can be run in three different ways. These are the three different ways to enter the trader schedule. The trader schedule is the number of each type of trader present in the market session. It should be noted that in BFBSE the buyer schedule is always equal to the seller schedule, i.e. there are the same number of buyers of each type as there are sellers. So if your schedule is 5 GDX and 5 AA, that means you will have 5 GDX buyers, 5 AA buyers, 5 GDX sellers and 5 AA sellers for a total of 20 traders. There are 6 traders available in TBSE, these are ZIC, ZIP, Giveaway, Shaver, AA, and GDX. The three ways to specify this schedule are:
 
 #### - From the config file:
 
