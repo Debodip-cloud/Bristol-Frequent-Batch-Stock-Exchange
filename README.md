@@ -1,4 +1,4 @@
-# The Threaded Bristol Stock Exchange (TBSE)
+# The Bristol Frequent Batch Stock Exchange (BFBSE)
 
 [![Python version: 3.4+](https://img.shields.io/badge/python-3.4+-blue.svg)](https://www.python.org/download/releases/3.4.0/)
 [![](https://img.shields.io/github/issues/MichaelRol/Threaded-Bristol-Stock-Exchange)](https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange/issues)
