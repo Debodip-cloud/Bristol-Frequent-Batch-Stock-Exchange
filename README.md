@@ -4,7 +4,7 @@
 [![](https://img.shields.io/github/issues/MichaelRol/Threaded-Bristol-Stock-Exchange)](https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-BFBSE is an extension of Dave Cliff's (University of Bristol) [Bristol Stock Exchange (BSE)](https://github.com/davecliff/BristolStockExchange "Bristol Stock Exchange") limit order-book financial exchange simulator and Rollins' [Threaded Bristol Stock Exchange (TBSE)] (https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange). BFBSE and aims to act as a minimal simulation of a limit-order-book financial exchange which uses FBAs. By using a first of its kind simulator of a FBA, I  evaluated the effectiveness of various trading algorithms under the constraints of discrete time intervals and batch processing, which they have not
+BFBSE is an extension of Dave Cliff's (University of Bristol) [Bristol Stock Exchange (BSE)](https://github.com/davecliff/BristolStockExchange "Bristol Stock Exchange") limit order-book financial exchange simulator and Rollins' [Threaded Bristol Stock Exchange (TBSE)] (https://github.com/MichaelRol/Threaded-Bristol-Stock-Exchange "TBSE"). BFBSE and aims to act as a minimal simulation of a limit-order-book financial exchange which uses FBAs. By using a first of its kind simulator of a FBA, I  evaluated the effectiveness of various trading algorithms under the constraints of discrete time intervals and batch processing, which they have not
 previously been tested with. 
 
 This simulator was produced for my MEng Individual Project.
