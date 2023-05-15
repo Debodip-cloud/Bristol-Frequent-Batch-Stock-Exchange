@@ -66,7 +66,7 @@ def process_csv_folder(folder_path):
     sorted_all_wins = dict(sorted(all_wins.items()))
 
 
-    comparison = re.search(r'half_second_batch_interval_varying_EQ\/(.+)', folder_path).group(1)
+    comparison = re.search(r'10_second_batch_interval_new_SHVR\/(.+)', folder_path).group(1)
     win_diffs = {k: v[0] - v[1] for k, v in sorted_all_wins.items()}
 
     for n,ratio in all_wins.items():
@@ -126,7 +126,7 @@ def process_csv_folder(folder_path):
 ### NEW ###
 data = []
 
-path = "half_second_batch_interval_varying_EQ" # the path to the directory containing the folders
+path = "10_second_batch_interval_new_SHVR" # the path to the directory containing the folders
 for folder_name in os.listdir(path):
     if os.path.isdir(os.path.join(path, folder_name)):
         all_wins, total_wins = process_csv_folder(os.path.join(path, folder_name))
