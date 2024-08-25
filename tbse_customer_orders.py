@@ -117,7 +117,7 @@ def customer_orders(time, coid, traders, trader_stats, order_sched, pending, ver
                 s = random.randint(0, len(schedule) - 1)
                 p_min = sys_min_check(min(schedule[s][0], schedule[s][1]))
                 p_max = sys_max_check(max(schedule[s][0], schedule[s][1]))
-            new_order_price = random.randint(p_min, p_max)
+            new_order_price = random.randint(int(p_min), int(p_max))
         else:
             sys.exit('ERROR: Unknown stepmode in schedule')
         new_order_price = sys_min_check(sys_max_check(new_order_price))
