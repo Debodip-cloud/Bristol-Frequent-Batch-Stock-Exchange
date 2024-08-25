@@ -17,5 +17,3 @@ python3 tbse.py 4, 0, 0, 16, 0, 0;
 python3 tbse.py 3, 0, 0, 17, 0, 0;
 python3 tbse.py 2, 0, 0, 18, 0, 0;
 python3 tbse.py 1, 0, 0, 19, 0, 0;
-
-
