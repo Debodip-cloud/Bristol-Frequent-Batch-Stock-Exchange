@@ -221,7 +221,7 @@ def run_exchange(
     required_batch_number = 1
     last_batch_time = 0
 
-    while start_event.isSet():        
+    while start_event.is_set():        
         
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
 
@@ -317,7 +317,7 @@ def run_trader(
     demand_curve = []
     supply_curve = []
 
-    while start_event.isSet():
+    while start_event.is_set():
         time.sleep(0.01)
         #print("in sleep 1")
         virtual_time = (time.time() - start_time) * (virtual_end / sess_length)
@@ -477,6 +477,7 @@ def market_session(
 
     # write trade_stats for this experiment NB end-of-session summary only
     if len_threads == len(traders) + 2:
+        #print(traders)
         trade_stats(sess_id, traders, tdump)
 
     return len_threads
