@@ -1,6 +1,6 @@
 time {
-    python3 tbse.py 19, 0, 0, 1, 0, 0
-    python3 tbse.py 18, 0, 0, 2, 0, 0
+    python3 tbse.py 19 0 0 1 0 0
+    python3 tbse.py 18 0 0 2 0 0
     python3 tbse.py 17, 0, 0, 3, 0, 0
     python3 tbse.py 16, 0, 0, 4, 0, 0
     python3 tbse.py 15, 0, 0, 5, 0, 0
