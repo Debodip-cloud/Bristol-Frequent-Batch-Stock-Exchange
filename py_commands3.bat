@@ -1,4 +1,4 @@
-Measure-Command {
+time {
     python3 tbse.py 19 0 0 1 0 0
     python3 tbse.py 18 0 0 2 0 0
     python3 tbse.py 17 0 0 3 0 0
